@@ -83,7 +83,13 @@ namespace UniTyped.Editor
 
             public static Enumerator Get(SerializedPropertyViewArray<TElementView> target)
             {
-                if (pool.TryPeek(out var pooled)) return pool.Pop();
+                if (pool.TryPeek(out var pooled))
+                {
+                    var popped = pool.Pop();
+                    popped.target = target;
+                    popped.Reset();
+                    return popped;
+                }
                 return new Enumerator(target);
             }
             
