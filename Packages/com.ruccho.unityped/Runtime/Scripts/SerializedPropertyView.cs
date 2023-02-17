@@ -1,5 +1,7 @@
 #if UNITY_EDITOR
 
+using System.Collections;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -15,13 +17,14 @@ namespace UniTyped.Editor
     {
         public SerializedProperty Property { get; set; }
     }
-    
+
     public interface ISerializedPropertyView<T> : ISerializedPropertyView
     {
         public T Value { get; set; }
     }
-    
-    public struct SerializedPropertyViewArray<TElementView> where TElementView: struct, ISerializedPropertyView
+
+    public struct SerializedPropertyViewArray<TElementView> : IEnumerable<TElementView>
+        where TElementView : struct, ISerializedPropertyView
     {
         public SerializedProperty Property { get; set; }
 
@@ -63,9 +66,63 @@ namespace UniTyped.Editor
         {
             return Property.MoveArrayElement(srcIndex, destIndex);
         }
+
+        public IEnumerator<TElementView> GetEnumerator()
+        {
+            return Enumerator.Get(this);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        class Enumerator : IEnumerator<TElementView>
+        {
+            private static readonly Stack<Enumerator> pool = new Stack<Enumerator>();
+
+            public static Enumerator Get(SerializedPropertyViewArray<TElementView> target)
+            {
+                if (pool.TryPeek(out var pooled)) return pool.Pop();
+                return new Enumerator(target);
+            }
+            
+            private SerializedPropertyViewArray<TElementView> target;
+            private int cursor = -1;
+
+            public Enumerator(SerializedPropertyViewArray<TElementView> target)
+            {
+                this.target = target;
+            }
+
+            public bool MoveNext()
+            {
+                cursor++;
+                if (cursor < target.Length)
+                {
+                    Current = target[cursor];
+                    return true;
+                }
+                else return false;
+            }
+
+            public void Reset()
+            {
+                cursor = -1;
+            }
+
+            public TElementView Current { get; private set; }
+
+            object IEnumerator.Current => Current;
+
+            public void Dispose()
+            {
+                pool.Push(this);
+            }
+        }
     }
-    
-    public struct SerializedPropertyViewFixedBuffer<TElementView> where TElementView: struct, ISerializedPropertyView
+
+    public struct SerializedPropertyViewFixedBuffer<TElementView> where TElementView : struct, ISerializedPropertyView
     {
         public SerializedProperty Property { get; set; }
 
@@ -87,9 +144,9 @@ namespace UniTyped.Editor
             }
         }
     }
-    
 
-    public struct SerializedPropertyViewObjectReference<T> : ISerializedPropertyView<T> where T: UnityEngine.Object
+
+    public struct SerializedPropertyViewObjectReference<T> : ISerializedPropertyView<T> where T : UnityEngine.Object
     {
         public SerializedProperty Property { get; set; }
 
@@ -394,6 +451,5 @@ namespace UniTyped.Editor
             set => Property.vector4Value = value;
         }
     }
-
 }
 #endif
