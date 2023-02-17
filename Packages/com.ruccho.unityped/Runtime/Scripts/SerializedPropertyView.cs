@@ -162,6 +162,17 @@ namespace UniTyped.Editor
             set => Property.objectReferenceValue = value;
         }
     }
+    
+    public struct SerializedPropertyViewManagedReference<T> : ISerializedPropertyView<T>
+    {
+        public SerializedProperty Property { get; set; }
+
+        public T Value
+        {
+            get => (T)Property.managedReferenceValue;
+            set => Property.managedReferenceValue = value;
+        }
+    }
 
     public struct SerializedPropertyViewByte : ISerializedPropertyView<byte>
     {

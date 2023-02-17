@@ -9,6 +9,7 @@ public class UniTypedGeneratorContext
     public INamedTypeSymbol List { get; }
     public INamedTypeSymbol Serializable { get; }
     public INamedTypeSymbol SerializeField { get; }
+    public INamedTypeSymbol SerializeReference { get; }
     public INamedTypeSymbol UnityEngineObject { get; }
     public INamedTypeSymbol AnimationCurve { get; }
     public INamedTypeSymbol BoundsInt { get; }
@@ -25,7 +26,7 @@ public class UniTypedGeneratorContext
     public INamedTypeSymbol Vector4 { get; }
     public INamedTypeSymbol UniTypedField { get; }
 
-    private readonly TypedViewDefinition[] builtinViews;
+    private readonly TypedViewDefinition[] builtinSerializeFieldViews;
 
     public IReadOnlyList<TypedViewDefinition> CustomValueViews => customValueViews;
 
@@ -33,33 +34,55 @@ public class UniTypedGeneratorContext
 
     private static readonly UnsuuportedViewDefinition unsuuportedView = new UnsuuportedViewDefinition();
 
-    private readonly HashSet<INamespaceSymbol> targetNamespaces = new HashSet<INamespaceSymbol>(SymbolEqualityComparer.Default);
+    private readonly HashSet<INamespaceSymbol> targetNamespaces =
+        new HashSet<INamespaceSymbol>(SymbolEqualityComparer.Default);
 
     public IReadOnlyCollection<INamespaceSymbol> TargetNamespaces => targetNamespaces;
 
     public void AddTargetNamespace(INamespaceSymbol namespaceSymbol) => targetNamespaces.Add(namespaceSymbol);
 
-    public TypedViewDefinition GetTypedView(UniTypedGeneratorContext context, ITypeSymbol type)
+    public enum ViewType
     {
-        foreach (var v in builtinViews)
+        SerializeField,
+        SerializedObject,
+        SerializeReferenceField
+    }
+
+    public TypedViewDefinition GetTypedView(UniTypedGeneratorContext context, ITypeSymbol type,
+        ViewType viewType = ViewType.SerializeField)
+    {
+        if (viewType == ViewType.SerializeReferenceField)
         {
-            if (v.Match(this, type)) return v;
+            return ManagedReferenceViewDefinition.Instance;
+        }
+
+        if (viewType == ViewType.SerializeField)
+        {
+            foreach (var v in builtinSerializeFieldViews)
+            {
+                if (v.Match(this, type)) return v;
+            }
         }
 
         //original generics
         if (type is INamedTypeSymbol namedType)
         {
             if (namedType.IsGenericType) namedType = namedType.OriginalDefinition;
-            var custom = GetOrAddObjectView(context, namedType);
+            var custom = GetOrAddObjectView(context, namedType, viewType);
             if (custom.Match(this, type)) return custom;
         }
 
         return unsuuportedView;
     }
 
-    public TypedViewDefinition GetOrAddObjectView(UniTypedGeneratorContext context, INamedTypeSymbol type,
-        bool rootObject = false)
+    private TypedViewDefinition GetOrAddObjectView(UniTypedGeneratorContext context, INamedTypeSymbol type,
+        ViewType viewType)
     {
+        if (viewType == ViewType.SerializeField && Utils.IsDerivedFrom(type, context.UnityEngineObject))
+        {
+            return UnityEngineObjectReferenceValueViewDefinition.Instance;
+        }
+
         foreach (var v in customValueViews)
         {
             if (v.Match(this, type)) return v;
@@ -67,24 +90,17 @@ public class UniTypedGeneratorContext
 
         TypedViewDefinition newView;
 
-        if (!rootObject && Utils.IsDerivedFrom(type, context.UnityEngineObject))
+        switch (type.TypeKind)
         {
-            newView = new UnityEngineObjectReferenceValueViewDefinition(context, type);
-        }
-        else
-        {
-            switch (type.TypeKind)
-            {
-                case TypeKind.Class:
-                case TypeKind.Struct:
-                    newView = new CustomValueViewDefinition(this, type);
-                    break;
-                case TypeKind.Enum:
-                    newView = new EnumValueViewDefinition(type);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+            case TypeKind.Class:
+            case TypeKind.Struct:
+                newView = new CustomValueViewDefinition(this, type);
+                break;
+            case TypeKind.Enum:
+                newView = new EnumValueViewDefinition(type);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
         }
 
         customValueViews.Add(newView);
@@ -108,6 +124,7 @@ public class UniTypedGeneratorContext
         List = GetSymbol("System.Collections.Generic.List`1");
         Serializable = GetSymbol("System.SerializableAttribute");
         SerializeField = GetSymbol("UnityEngine.SerializeField");
+        SerializeReference = GetSymbol("UnityEngine.SerializeReference");
         UnityEngineObject = GetSymbol("UnityEngine.Object");
         AnimationCurve = GetSymbol("UnityEngine.AnimationCurve");
         BoundsInt = GetSymbol("UnityEngine.BoundsInt");
@@ -125,7 +142,7 @@ public class UniTypedGeneratorContext
 
         UniTypedField = GetSymbol("UniTyped.UniTypedFieldAttribute");
 
-        builtinViews = new TypedViewDefinition[]
+        builtinSerializeFieldViews = new TypedViewDefinition[]
         {
             new TypeParameterViewDefinition(),
             new ArrayViewDefinition(),

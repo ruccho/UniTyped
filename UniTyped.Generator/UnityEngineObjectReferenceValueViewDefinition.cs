@@ -3,33 +3,29 @@ using Microsoft.CodeAnalysis;
 
 namespace UniTyped.Generator;
 
-public
-    class UnityEngineObjectReferenceValueViewDefinition : TypedViewDefinition
+public class UnityEngineObjectReferenceValueViewDefinition : BuiltinViewDefinition
 {
+    public static readonly UnityEngineObjectReferenceValueViewDefinition Instance =
+        new UnityEngineObjectReferenceValueViewDefinition();
+    
     public override bool IsDirectAccess => true;
-
-    private ITypeSymbol ObjectType { get; }
-
-
-    public UnityEngineObjectReferenceValueViewDefinition(UniTypedGeneratorContext context,
-        ITypeSymbol objectType)
-    {
-        if (!Utils.IsDerivedFrom(objectType, context.UnityEngineObject)) throw new ArgumentException();
-        ObjectType = objectType;
-    }
 
     public override bool Match(UniTypedGeneratorContext context, ITypeSymbol type)
     {
-        return SymbolEqualityComparer.Default.Equals(type, ObjectType);
+        return Utils.IsDerivedFrom(type, context.UnityEngineObject);
     }
 
     public override string GetViewTypeSyntax(UniTypedGeneratorContext context, ITypeSymbol type)
     {
+        return $"global::UniTyped.Editor.SerializedPropertyViewObjectReference<{Utils.GetFullQualifiedTypeName(type)}>";
+        /*
         return type.ContainingNamespace.IsGlobalNamespace
             ? $"global::UniTyped.Generated.{type.Name}View"
             : $"global::UniTyped.Generated.{type.ContainingNamespace}.{type.Name}View";
+            */
     }
 
+    /*
     public override void GenerateView(UniTypedGeneratorContext context, StringBuilder sourceBuilder)
     {
         var symbol = ObjectType;
@@ -69,5 +65,5 @@ public
 
         sourceBuilder.AppendLine($"    }} // struct ");
         sourceBuilder.AppendLine($"}} // namespace ");
-    }
+    }*/
 }

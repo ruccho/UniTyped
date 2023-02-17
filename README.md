@@ -102,7 +102,6 @@ public class ExampleEditor : UnityEditor.Editor
 
 
 ## Limitations
- - `[SerializeReference]` is not supported (yet).
  - This project is currently experimental and breaking changes may be made.
  - It may not cover all use cases. Please let me know by issues if you notice anything.
 

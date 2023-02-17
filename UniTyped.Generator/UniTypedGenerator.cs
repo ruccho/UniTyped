@@ -86,7 +86,7 @@ namespace UniTyped.Generator
                 var symbol = semanticModel.GetDeclaredSymbol(uniTypedType) as INamedTypeSymbol;
                 if (symbol == null) continue;
 
-                context.GetOrAddObjectView(context, symbol, true);
+                context.GetTypedView(context, symbol, UniTypedGeneratorContext.ViewType.SerializedObject);
             }
 
             for (int i = 0; i < context.CustomValueViews.Count; i++)

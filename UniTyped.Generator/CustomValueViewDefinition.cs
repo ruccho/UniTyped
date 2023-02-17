@@ -106,18 +106,30 @@ public class CustomValueViewDefinition : TypedViewDefinition
 
                 //check whether being serialized
 
-                bool hasSerializeField = field.GetAttributes().Any(a =>
-                    SymbolEqualityComparer.Default.Equals(a.AttributeClass, context.SerializeField));
-
                 var type = field.Type;
                 var namedType = type as INamedTypeSymbol;
 
-                sourceBuilder.AppendLine(
-                    $"        // {type.MetadataName} ({type.GetType()}) {field.MetadataName} (generics: {namedType?.IsGenericType}) (unbound generics: {namedType?.IsUnboundGenericType})");
-
-                if (field.DeclaredAccessibility != Accessibility.Public && !hasSerializeField) continue;
+                
                 if (field.IsStatic) continue;
                 if (field.IsConst) continue;
+
+                bool hasSerializeField = field.GetAttributes().Any(a =>
+                    SymbolEqualityComparer.Default.Equals(a.AttributeClass, context.SerializeField));
+                
+                bool hasSerializeReference = field.GetAttributes().Any(a =>
+                    SymbolEqualityComparer.Default.Equals(a.AttributeClass, context.SerializeReference));
+
+                bool isSerializeField = hasSerializeField || (!hasSerializeReference && field.DeclaredAccessibility == Accessibility.Public);
+                bool isSerializeReference = !isSerializeField && hasSerializeReference;
+                
+                sourceBuilder.AppendLine(
+                    $"        //  {type.MetadataName} ({type.GetType()}) {field.MetadataName} (isSerializeField: {isSerializeField}) (isSerializeReference: {isSerializeReference})");
+                
+                if (!isSerializeField && !isSerializeReference) continue;
+
+                var viewType = isSerializeField
+                    ? UniTypedGeneratorContext.ViewType.SerializeField
+                    : UniTypedGeneratorContext.ViewType.SerializeReferenceField;
 
                 TypedViewDefinition view;
                 if (field.IsFixedSizeBuffer)
@@ -127,8 +139,8 @@ public class CustomValueViewDefinition : TypedViewDefinition
                 }
                 else
                 {
-                    if (!Utils.IsSerializableType(context, type)) continue;
-                    view = context.GetTypedView(context, field.Type);
+                    if (isSerializeField && !Utils.IsSerializableType(context, type)) continue;
+                    view = context.GetTypedView(context, field.Type, viewType);
                 }
 
                 if (view == null) continue;

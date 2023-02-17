@@ -236,108 +236,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f574e8ea5e85e0a4d928696639226a2e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ByteValue: 0
-  SByteValue: 0
-  Int16Value: 0
-  UInt16Value: 0
-  Int32Value: 1206
-  UInt32Value: 0
-  Int64Value: 0
-  UInt64Value: 0
-  SingleValue: 0
-  DoubleValue: 0
-  BooleanValue: 0
-  StringValue: 
-  CharValue: 0
-  AnimationCurveValue:
-    m_Curve: []
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  BoundsIntValue:
-    m_Position: {x: 0, y: 0, z: 0}
-    m_Size: {x: 0, y: 0, z: 0}
-  BoundsValue:
-    m_Center: {x: 0, y: 0, z: 0}
-    m_Extent: {x: 0, y: 0, z: 0}
-  ColorValue:
-    r: 0
-    g: 0
-    b: 0
-    a: 0
-  Hash128Value:
-    bytes[0]: 0
-    bytes[1]: 0
-    bytes[2]: 0
-    bytes[3]: 0
-    bytes[4]: 0
-    bytes[5]: 0
-    bytes[6]: 0
-    bytes[7]: 0
-    bytes[8]: 0
-    bytes[9]: 0
-    bytes[10]: 0
-    bytes[11]: 0
-    bytes[12]: 0
-    bytes[13]: 0
-    bytes[14]: 0
-    bytes[15]: 0
-  QuaternionValue: {x: 0, y: 0, z: 0, w: 0}
-  RectIntValue:
-    x: 0
-    y: 0
-    width: 0
-    height: 0
-  RectValue:
-    x: 0
-    y: 0
-    width: 0
-    height: 0
-  Vector2IntValue: {x: 0, y: 0}
-  Vector2Value: {x: 0, y: 0}
-  Vector3IntValue: {x: 0, y: 0, z: 0}
-  Vector3Value: {x: 0, y: 0, z: 0}
-  Vector4Value: {x: 0, y: 0, z: 0, w: 0}
-  someEnum: 1
-  someEnumSmall: 0
-  someObject: {fileID: 0}
-  someTexture: {fileID: 0}
-  genericsValue:
-    t1Value: 0
-    t1Array: 
-    t1List: 
-  fixedBufferContainer:
-    fixedBuffer:
-    - 0
-    - 0
-    - 0
-    - 0
-    - 0
-    - 0
-    - 0
-    - 0
-    - 0
-    - 0
-    - 0
-    - 0
-    - 0
-    - 0
-    - 0
-    - 0
-    - 0
-    - 0
-    - 0
-    - 0
-    - 0
-    - 0
-    - 0
-    - 0
-    - 0
-    - 0
-    - 0
-    - 0
-    - 0
-    - 0
+  someArray: 
+  texture: {fileID: 0}
+  serializeReference:
+    rid: 2132984785687281858
+  references:
+    version: 2
+    RefIds:
+    - rid: 2132984785687281858
+      type: {class: SerializeReferenceTestDerived, ns: , asm: Assembly-CSharp}
+      data:
+        baseValue: 33
+        derivedValue: 23
 --- !u!4 &972577648
 Transform:
   m_ObjectHideFlags: 0

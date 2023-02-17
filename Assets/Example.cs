@@ -1,25 +1,33 @@
+using System;
 using UnityEngine;
 using UniTyped;
-using UniTyped.Generated.UniTypedTest;
-using UniTypedTest;
+using UniTyped.Generated;
 
-namespace UniTypedTest
+[UniTyped] //コード生成用の属性
+public class Example : MonoBehaviour
 {
-    [UniTyped]
-    public class Example : MonoBehaviour
-    {
-        [SerializeField, UniTypedField(ignore = true)]
-        private int ignoredField = 0;
+    [SerializeField] private int[] someArray;
+    [SerializeField, UniTypedField(forceNested = true)] private Texture2D texture;
 
-        [SerializeField, UniTypedField(forceNested = true)]
-        private int nestedField = 0;
-    }
+    [SerializeReference] private SerializeReferenceTest serializeReference;
 }
+
+public abstract class SerializeReferenceTest
+{
+    [SerializeField] private int baseValue;
+}
+
+//[Serializable]
+public class SerializeReferenceTestDerived : SerializeReferenceTest
+{
+    [SerializeField] private int derivedValue;
+}
+
 
 #if UNITY_EDITOR
 
 [UnityEditor.CustomEditor(typeof(Example))]
-public class HogeEditor : UnityEditor.Editor
+public class ExampleEditor : UnityEditor.Editor
 {
     public override void OnInspectorGUI()
     {
@@ -28,18 +36,28 @@ public class HogeEditor : UnityEditor.Editor
             Target = serializedObject
         };
 
+        //配列
+        for (int i = 0; i < view.someArray.Length; i++)
+        {
+            Debug.Log(view.someArray[i].Value);
+        }
         
-        //view.ignoredField++; // error: Cannot resolve symbol 'ignoreField'
+        //IEnumerator経由でアクセス
+        foreach (var element in view.someArray)
+        {
+            Debug.Log(element.Value);
+        }
 
-        Debug.Log(view.nestedField.Value); //int
-        Debug.Log(view.nestedField.Property); //SerializedProperty
-        
+        view.serializeReference ??= new SerializeReferenceTestDerived(); 
 
         serializedObject.ApplyModifiedProperties();
         
     }
 }
+
 #endif
+
+
 
 /*
 
