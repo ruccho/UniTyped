@@ -1,6 +1,8 @@
 # UniTyped
 
-UniTyped is a source generator for Unity that provides strongly typed access to serialized data through SerializedObject / SerializedProperty.
+[日本語版](README.ja.md)
+
+UniTyped is a source generator for Unity that provides strongly typed access to serialized data through SerializedObject / SerializedProperty.　It helps you write more concise and safe editor extension code.
 
 - **Statically Typed**: You don't have to write tons of `FindProperty` or touch the confusing SerializedProperty APIs.
 - **Less Heap Allocations**:  Generated code is struct-based and designed to avoid boxing; It is suitable for repeated invocations from OnInspectorGUI() and other editor codes, making your editor experience better.
@@ -52,6 +54,9 @@ public class ExampleEditor : UnityEditor.Editor
 ## Configure Code Generation
 Use `[UniTypedField]` attribute to control the result of code generation.
 
+ - `ignore`: ignores the field.
+ - `nestedField`: By default, UniTyped flattens accessor property to allow direct manipulation of values, but this option avoids that and exposes internal view. It is useful to access `SerializedProperty` of specific field.
+
 ```csharp
 using UnityEngine;
 using UniTyped;
@@ -94,12 +99,10 @@ public class ExampleEditor : UnityEditor.Editor
 #endif
 ```
 
- - `ignore`: ignores the field.
- - `nestedField`: By default, UniTyped flattens accessor property to allow direct manipulation of values, but this option avoids that and exposes internal view. It is useful to access `SerializedProperty` of specific field.
 
 
 ## Limitations
- - `[SerializeReference]` is not supported yet.
+ - `[SerializeReference]` is not supported (yet).
  - This project is currently experimental and breaking changes may be made.
  - It may not cover all use cases. Please let me know by issues if you notice anything.
 
