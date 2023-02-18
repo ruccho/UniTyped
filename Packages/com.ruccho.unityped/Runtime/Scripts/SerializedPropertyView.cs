@@ -1,7 +1,9 @@
 #if UNITY_EDITOR
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using UnityEditor;
 using UnityEngine;
 
@@ -90,9 +92,10 @@ namespace UniTyped.Editor
                     popped.Reset();
                     return popped;
                 }
+
                 return new Enumerator(target);
             }
-            
+
             private SerializedPropertyViewArray<TElementView> target;
             private int cursor = -1;
 
@@ -162,7 +165,7 @@ namespace UniTyped.Editor
             set => Property.objectReferenceValue = value;
         }
     }
-    
+
     public struct SerializedPropertyViewManagedReference<T> : ISerializedPropertyView<T>
     {
         public SerializedProperty Property { get; set; }
@@ -261,8 +264,22 @@ namespace UniTyped.Editor
             get => Property.ulongValue;
             set => Property.ulongValue = value;
 #else
-            get => (ulong)Property.longValue;
-            set => Property.longValue = (long)value;
+            get
+            {
+                Span<long> val = stackalloc long[1]
+                {
+                    Property.longValue
+                };
+                return MemoryMarshal.Cast<long, ulong>(val)[0];
+            }
+            set
+            {
+                Span<ulong> val = stackalloc ulong[1]
+                {
+                    value
+                };
+                Property.longValue = MemoryMarshal.Cast<ulong, long>(val)[0];
+            }
 #endif
         }
     }
