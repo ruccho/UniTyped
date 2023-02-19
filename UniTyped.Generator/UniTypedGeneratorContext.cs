@@ -28,23 +28,25 @@ public class UniTypedGeneratorContext
 
     private readonly TypedViewDefinition[] builtinSerializeFieldViews;
 
-    public IReadOnlyList<TypedViewDefinition> CustomValueViews => customValueViews;
+    public IReadOnlyList<GeneratedViewDefinition> GeneratedViews => generatedViews;
 
-    private List<TypedViewDefinition> customValueViews = new List<TypedViewDefinition>();
+    private List<GeneratedViewDefinition> generatedViews = new List<GeneratedViewDefinition>();
 
     private static readonly UnsuuportedViewDefinition unsuuportedView = new UnsuuportedViewDefinition();
 
+    /*
     private readonly HashSet<INamespaceSymbol> targetNamespaces =
         new HashSet<INamespaceSymbol>(SymbolEqualityComparer.Default);
 
     public IReadOnlyCollection<INamespaceSymbol> TargetNamespaces => targetNamespaces;
 
     public void AddTargetNamespace(INamespaceSymbol namespaceSymbol) => targetNamespaces.Add(namespaceSymbol);
+    */
 
     public enum ViewType
     {
+        Root,
         SerializeField,
-        SerializedObject,
         SerializeReferenceField
     }
 
@@ -83,12 +85,12 @@ public class UniTypedGeneratorContext
             return UnityEngineObjectReferenceValueViewDefinition.Instance;
         }
 
-        foreach (var v in customValueViews)
+        foreach (var v in generatedViews)
         {
             if (v.Match(this, type)) return v;
         }
 
-        TypedViewDefinition newView;
+        GeneratedViewDefinition newView;
 
         switch (type.TypeKind)
         {
@@ -103,7 +105,7 @@ public class UniTypedGeneratorContext
                 throw new ArgumentOutOfRangeException();
         }
 
-        customValueViews.Add(newView);
+        generatedViews.Add(newView);
 
         return newView;
     }

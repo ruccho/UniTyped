@@ -3,8 +3,25 @@ using Microsoft.CodeAnalysis;
 
 namespace UniTyped.Generator;
 
-public class CustomValueViewDefinition : TypedViewDefinition
+public class CustomValueViewDefinition : GeneratedViewDefinition
 {
+    class ResolvedFieldEntry
+    {
+        public IFieldSymbol Field { get; }
+        public TypedViewDefinition View { get; }
+
+        public bool ForceNested { get; }
+
+        public ResolvedFieldEntry(IFieldSymbol field, TypedViewDefinition view, bool forceNested)
+        {
+            Field = field;
+            View = view;
+            ForceNested = forceNested;
+        }
+    }
+
+    private List<ResolvedFieldEntry> resolvedFields = new List<ResolvedFieldEntry>();
+
     public override bool IsDirectAccess => false;
 
     public ITypeSymbol TemplateTypeSymbol { get; }
@@ -24,62 +41,11 @@ public class CustomValueViewDefinition : TypedViewDefinition
         return !IsUnityEngineObject && SymbolEqualityComparer.Default.Equals(type, TemplateTypeSymbol);
     }
 
-    public override void GenerateView(UniTypedGeneratorContext context, StringBuilder sourceBuilder)
+    public override void Resolve(UniTypedGeneratorContext context)
     {
         var symbol = TemplateTypeSymbol;
 
-
-        sourceBuilder.AppendLine($"// {symbol.MetadataName}");
-        
-        context.AddTargetNamespace(symbol.ContainingNamespace);
-
-        if (symbol.ContainingNamespace.IsGlobalNamespace)
-            sourceBuilder.AppendLine($"namespace UniTyped.Generated");
-        else
-            sourceBuilder.AppendLine($"namespace UniTyped.Generated.{symbol.ContainingNamespace}");
-        sourceBuilder.AppendLine($"{{");
-
-        sourceBuilder.Append($"    public struct {symbol.Name}View");
-        {
-            if (symbol is INamedTypeSymbol { IsGenericType: true } namedSymbol)
-            {
-                sourceBuilder.Append(Utils.ExtractTypeParameters(namedSymbol));
-            }
-        }
-
-        if (!IsUnityEngineObject)
-        {
-            sourceBuilder.Append(" : global::UniTyped.Editor.ISerializedPropertyView");
-        }
-
-        {
-            if (symbol is INamedTypeSymbol { IsGenericType: true } namedSymbol)
-            {
-                for (int i = 0; i < namedSymbol.TypeArguments.Length; i++)
-                {
-                    var param = namedSymbol.TypeArguments[i];
-                    sourceBuilder.Append(" where ");
-                    sourceBuilder.Append(param.Name);
-                    sourceBuilder.Append(" : struct, global::UniTyped.Editor.ISerializedPropertyView");
-                }
-            }
-        }
-
-        sourceBuilder.AppendLine();
-        sourceBuilder.AppendLine("    {");
-
-        if (IsUnityEngineObject)
-        {
-            sourceBuilder.AppendLine("""
-        public global::UnityEditor.SerializedObject Target { get; set; }
-""");
-        }
-        else
-        {
-            sourceBuilder.AppendLine("""
-        public global::UnityEditor.SerializedProperty Property { get; set; }
-""");
-        }
+        resolvedFields.Clear();
 
         while (symbol != null)
         {
@@ -107,24 +73,22 @@ public class CustomValueViewDefinition : TypedViewDefinition
                 //check whether being serialized
 
                 var type = field.Type;
-                var namedType = type as INamedTypeSymbol;
 
-                
+
                 if (field.IsStatic) continue;
                 if (field.IsConst) continue;
 
                 bool hasSerializeField = field.GetAttributes().Any(a =>
                     SymbolEqualityComparer.Default.Equals(a.AttributeClass, context.SerializeField));
-                
+
                 bool hasSerializeReference = field.GetAttributes().Any(a =>
                     SymbolEqualityComparer.Default.Equals(a.AttributeClass, context.SerializeReference));
 
-                bool isSerializeField = hasSerializeField || (!hasSerializeReference && field.DeclaredAccessibility == Accessibility.Public);
+                bool isSerializeField = hasSerializeField ||
+                                        (!hasSerializeReference && field.DeclaredAccessibility == Accessibility.Public);
                 bool isSerializeReference = !isSerializeField && hasSerializeReference;
-                
-                sourceBuilder.AppendLine(
-                    $"        //  {type.MetadataName} ({type.GetType()}) {field.MetadataName} (isSerializeField: {isSerializeField}) (isSerializeReference: {isSerializeReference})");
-                
+
+
                 if (!isSerializeField && !isSerializeReference) continue;
 
                 var viewType = isSerializeField
@@ -143,29 +107,103 @@ public class CustomValueViewDefinition : TypedViewDefinition
                     view = context.GetTypedView(context, field.Type, viewType);
                 }
 
-                if (view == null) continue;
+                resolvedFields.Add(new ResolvedFieldEntry(field, view, forceNested));
+            }
 
-                var name = field.Name;
+            symbol = symbol.BaseType;
+        }
+    }
 
-                var finderSyntax = IsUnityEngineObject
-                    ? $"Target.FindProperty(\"{name}\")"
-                    : $"Property.FindPropertyRelative(\"{name}\")";
-
-                var viewTypeSyntax = view.GetViewTypeSyntax(context, type);
-                var viewPropertyName = $"__unityped__{name}";
-                var backingFieldName = $"__unityped__{name}_backing";
-                var viewInitialization =
-                    view.GenerateViewInitialization(context, field, backingFieldName, finderSyntax);
+    public override void GenerateViewTypeOpen(UniTypedGeneratorContext context, StringBuilder sourceBuilder)
+    {
+        var symbol = TemplateTypeSymbol;
 
 
-                sourceBuilder.AppendLine($$"""
+        sourceBuilder.AppendLine($"    // {symbol.MetadataName}");
+        sourceBuilder.Append($"    public struct {symbol.Name}View");
+        {
+            if (symbol is INamedTypeSymbol { IsGenericType: true } namedSymbol)
+            {
+                sourceBuilder.Append(Utils.ExtractTypeParameters(context, namedSymbol, false));
+            }
+        }
+
+        if (!IsUnityEngineObject)
+        {
+            sourceBuilder.Append(" : global::UniTyped.Editor.ISerializedPropertyView");
+        }
+
+        {
+            if (symbol is INamedTypeSymbol { IsGenericType: true } namedSymbol)
+            {
+                for (int i = 0; i < namedSymbol.TypeArguments.Length; i++)
+                {
+                    var param = namedSymbol.TypeArguments[i];
+                    sourceBuilder.Append(" where ");
+                    sourceBuilder.Append(param.Name);
+                    sourceBuilder.Append(" : struct, global::UniTyped.Editor.ISerializedPropertyView");
+                }
+            }
+        }
+
+        sourceBuilder.AppendLine();
+        sourceBuilder.AppendLine("    {");
+    }
+
+    public override void GenerateViewTypeClose(UniTypedGeneratorContext context, StringBuilder sourceBuilder)
+    {
+        var symbol = TemplateTypeSymbol;
+        sourceBuilder.AppendLine($"    }} // struct {symbol.Name}View");
+    }
+
+    public override void GenerateViewTypeContent(UniTypedGeneratorContext context, StringBuilder sourceBuilder)
+    {
+        var symbol = TemplateTypeSymbol;
+
+
+        if (IsUnityEngineObject)
+        {
+            sourceBuilder.AppendLine("""
+        public global::UnityEditor.SerializedObject Target { get; set; }
+""");
+        }
+        else
+        {
+            sourceBuilder.AppendLine("""
+        public global::UnityEditor.SerializedProperty Property { get; set; }
+""");
+        }
+
+        foreach (var fieldEntry in resolvedFields)
+        {
+            var field = fieldEntry.Field;
+
+            var type = field.Type;
+
+            var view = fieldEntry.View;
+            var forceNested = fieldEntry.ForceNested;
+
+            var name = field.Name;
+
+            var finderSyntax = IsUnityEngineObject
+                ? $"Target.FindProperty(\"{name}\")"
+                : $"Property.FindPropertyRelative(\"{name}\")";
+
+            var viewTypeSyntax = view.GetViewTypeSyntax(context, type);
+            var viewPropertyName = $"__unityped__{name}";
+            var backingFieldName = $"__unityped__{name}_backing";
+            var viewInitialization =
+                view.GenerateViewInitialization(context, field, backingFieldName, finderSyntax);
+
+
+            sourceBuilder.AppendLine($$"""
         private {{viewTypeSyntax}} {{backingFieldName}};
 """);
-                if (!forceNested && view.IsDirectAccess)
-                {
-                    var fullQualifiedTypeName = Utils.GetFullQualifiedTypeName(type);
+            if (!forceNested && view.IsDirectAccess)
+            {
+                var fullQualifiedTypeName = Utils.GetFullQualifiedTypeName(context, type, false);
 
-                    sourceBuilder.AppendLine($$"""
+                sourceBuilder.AppendLine($$"""
         private {{viewTypeSyntax}} {{viewPropertyName}}
         {
             get
@@ -186,10 +224,10 @@ public class CustomValueViewDefinition : TypedViewDefinition
         }
 
 """);
-                }
-                else
-                {
-                    sourceBuilder.AppendLine($$"""
+            }
+            else
+            {
+                sourceBuilder.AppendLine($$"""
         public {{viewTypeSyntax}} {{name}}
         {
             get
@@ -199,14 +237,8 @@ public class CustomValueViewDefinition : TypedViewDefinition
             }
         }
 """);
-                }
             }
-
-            symbol = symbol.BaseType;
         }
-
-        sourceBuilder.AppendLine($"    }} // struct ");
-        sourceBuilder.AppendLine($"}} // namespace ");
     }
 
     private static readonly StringBuilder tempStringBuilder = new StringBuilder();
@@ -215,35 +247,25 @@ public class CustomValueViewDefinition : TypedViewDefinition
     {
         var templateType = TemplateTypeSymbol;
         var fieldType = type as INamedTypeSymbol;
-        string genericsParams = "";
-        if (fieldType != null && fieldType.IsGenericType)
+
+        return $"global::UniTyped.Generated.{Utils.GetFullQualifiedTypeName(context, type, true, "View")}";
+    }
+
+    public override TypePath GetFullTypePath(UniTypedGeneratorContext context)
+    {
+        var templateType = TemplateTypeSymbol;
+
+        var templateTypePath = Utils.GetTypePath(templateType);
+        
+        var root = templateTypePath;
+        while (root.Parent != null)
         {
-            tempStringBuilder.Clear();
-
-            tempStringBuilder.Append("<");
-            for (int i = 0; i < fieldType.TypeArguments.Length; i++)
-            {
-                var param = fieldType.TypeArguments[i];
-                if (i > 0) tempStringBuilder.Append(", ");
-
-                if (param is ITypeParameterSymbol)
-                {
-                    tempStringBuilder.Append(param.Name);
-                }
-                else
-                {
-                    tempStringBuilder.Append(context.GetTypedView(context, param)
-                        .GetViewTypeSyntax(context, param));
-                }
-            }
-
-            tempStringBuilder.Append(">");
-
-            genericsParams = tempStringBuilder.ToString();
+            root = root.Parent;
         }
+        
+        root.Parent = new TypePath("UniTyped.Generated");
+        templateTypePath.Name += "View";
 
-        return templateType.ContainingNamespace.IsGlobalNamespace
-            ? $"global::UniTyped.Generated.{templateType.Name}View{genericsParams}"
-            : $"global::UniTyped.Generated.{templateType.ContainingNamespace}.{templateType.Name}View{genericsParams}";
+        return templateTypePath;
     }
 }

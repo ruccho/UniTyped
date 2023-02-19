@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis;
 
 namespace UniTyped.Generator;
 
-public class EnumValueViewDefinition : TypedViewDefinition
+public class EnumValueViewDefinition : GeneratedViewDefinition
 {
     public override bool IsDirectAccess => true;
 
@@ -23,49 +23,66 @@ public class EnumValueViewDefinition : TypedViewDefinition
 
     public override string GetViewTypeSyntax(UniTypedGeneratorContext context, ITypeSymbol type)
     {
-        return type.ContainingNamespace.IsGlobalNamespace
-            ? $"global::UniTyped.Generated.{type.Name}View"
-            : $"global::UniTyped.Generated.{type.ContainingNamespace}.{type.Name}View";
+        return $"global::UniTyped.Generated.{Utils.GetFullQualifiedTypeName(context, type, true, "View")}";
     }
 
-    public override void GenerateView(UniTypedGeneratorContext context, StringBuilder sourceBuilder)
+    public override void Resolve(UniTypedGeneratorContext context)
+    {
+        
+    }
+
+    public override TypePath GetFullTypePath(UniTypedGeneratorContext context)
+    {
+        var templateType = EnumType;
+
+        var templateTypePath = Utils.GetTypePath(templateType);
+        
+        var root = templateTypePath;
+        while (root.Parent != null)
+        {
+            root = root.Parent;
+        }
+        
+        root.Parent = new TypePath("UniTyped.Generated");
+        templateTypePath.Name += "View";
+
+        return templateTypePath;
+    }
+
+    public override void GenerateViewTypeOpen(UniTypedGeneratorContext context, StringBuilder sourceBuilder)
     {
         var symbol = EnumType;
-
-        sourceBuilder.AppendLine($"// {symbol.MetadataName}");
-
-        context.AddTargetNamespace(symbol.ContainingNamespace);
-
-        if (symbol.ContainingNamespace.IsGlobalNamespace)
-            sourceBuilder.AppendLine($"namespace UniTyped.Generated");
-        else
-            sourceBuilder.AppendLine($"namespace UniTyped.Generated.{symbol.ContainingNamespace}");
-        sourceBuilder.AppendLine($"{{");
-
         sourceBuilder.Append($"    public struct {symbol.Name}View");
-        {
-            if (symbol is INamedTypeSymbol { IsGenericType: true } namedSymbol)
-            {
-                sourceBuilder.Append(Utils.ExtractTypeParameters(namedSymbol));
-            }
-        }
 
         sourceBuilder.Append(" : global::UniTyped.Editor.ISerializedPropertyView");
 
         sourceBuilder.AppendLine();
         sourceBuilder.AppendLine("    {");
+    }
+
+    public override void GenerateViewTypeContent(UniTypedGeneratorContext context, StringBuilder sourceBuilder)
+    {
+        var symbol = EnumType;
+
+        sourceBuilder.AppendLine($"// {symbol.MetadataName}");
+
+
 
         sourceBuilder.AppendLine($$"""
         public global::UnityEditor.SerializedProperty Property { get; set; }
 
-        public {{Utils.GetFullQualifiedTypeName(symbol)}} Value
+        public {{Utils.GetFullQualifiedTypeName(context, symbol, false)}} Value
         {
-            get => ({{Utils.GetFullQualifiedTypeName(symbol)}}) Property.enumValueIndex;
+            get => ({{Utils.GetFullQualifiedTypeName(context, symbol, false)}}) Property.enumValueIndex;
             set => Property.enumValueIndex = (int) value;
         }
 """);
 
-        sourceBuilder.AppendLine($"    }} // struct ");
-        sourceBuilder.AppendLine($"}} // namespace ");
+    }
+
+    public override void GenerateViewTypeClose(UniTypedGeneratorContext context, StringBuilder sourceBuilder)
+    {
+        var symbol = EnumType;
+        sourceBuilder.AppendLine($"    }} // struct {symbol.Name}View");
     }
 }

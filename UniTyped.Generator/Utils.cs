@@ -1,9 +1,23 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Text;
+using Microsoft.CodeAnalysis;
 
 namespace UniTyped.Generator;
 
 internal static class Utils
 {
+    private static Stack<StringBuilder> stringBuilderPool = new Stack<StringBuilder>();
+
+    private static StringBuilder GetStringBuilder()
+    {
+        if (stringBuilderPool.Count > 0) return stringBuilderPool.Peek() ?? throw new NullReferenceException();
+        return new StringBuilder();
+    }
+
+    private static void ReleaseStringBuilder(StringBuilder used)
+    {
+        used.Clear();
+        stringBuilderPool.Push(used);
+    }
 
     public static bool IsPrimitiveSerializableType(ITypeSymbol symbol) => symbol.SpecialType is
             SpecialType.System_Boolean or
@@ -70,32 +84,111 @@ internal static class Utils
                 SymbolEqualityComparer.Default.Equals(a.AttributeClass, context.Serializable));
         }
 
-        public static string ExtractTypeParameters(INamedTypeSymbol type)
+        public static string ExtractTypeArguments(UniTypedGeneratorContext context, ITypeSymbol type, bool replaceWithViewType)
         {
-            string result = "";
-            if (type.IsGenericType)
+            if (type is not INamedTypeSymbol namedType) return "";
+            var sb = GetStringBuilder();
+            try
             {
-                result = "<";
-                for (int i = 0; i < type.TypeArguments.Length; i++)
+                if (namedType.TypeArguments.Length > 0)
                 {
-                    var param = type.TypeArguments[i];
-                    if (i > 0) result += ", ";
-                    result += GetFullQualifiedTypeName(param);
+                    sb.Append("<");
+                    for (int i = 0; i < namedType.TypeArguments.Length; i++)
+                    {
+                        var param = namedType.TypeArguments[i];
+                        if (i > 0) sb.Append(", ");
+                        if (!replaceWithViewType || type is ITypeParameterSymbol)
+                        {
+                            sb.Append(GetFullQualifiedTypeName(context, param, replaceWithViewType));
+                        }
+                        else
+                        {
+                            sb.Append(context.GetTypedView(context, param).GetViewTypeSyntax(context, param));
+                        }
+                    }
+
+                    sb.Append(">");
                 }
 
-                result += ">";
+                return sb.ToString();
             }
-
-            return result;
+            finally
+            {
+                ReleaseStringBuilder(sb);
+            }
         }
 
-        public static string GetFullQualifiedTypeName(ITypeSymbol type)
+        public static string ExtractTypeParameters(UniTypedGeneratorContext context, ITypeSymbol type, bool replaceWithViewType)
+        {
+            if (type is not INamedTypeSymbol namedType) return "";
+            var sb = GetStringBuilder();
+            try
+            {
+                if (namedType.TypeArguments.Length > 0)
+                {
+                    sb.Append("<");
+                    for (int i = 0; i < namedType.TypeArguments.Length; i++)
+                    {
+                        var param = namedType.TypeArguments[i];
+                        if (i > 0) sb.Append(", ");
+                        sb.Append(GetFullQualifiedTypeName(context, param, replaceWithViewType));
+                    }
+
+                    sb.Append(">");
+                }
+
+                return sb.ToString();
+            }
+            finally
+            {
+                ReleaseStringBuilder(sb);
+            }
+        }
+
+        public static string GetFullQualifiedTypeName(UniTypedGeneratorContext context, ITypeSymbol type, bool replaceWithViewType, string suffix = "")
         {
             if (type is ITypeParameterSymbol) return type.Name;
 
-            return type.ContainingNamespace.IsGlobalNamespace
-                ? $"global::{type.Name}"
-                : $"global::{type.ContainingNamespace}.{type.Name}";
+            StringBuilder sb = GetStringBuilder();
+
+            void AppendTypePath(ITypeSymbol t, string suffix)
+            {
+                if (t.ContainingType != null)
+                {
+                    AppendTypePath(t.ContainingType, "");
+                    sb.Append(".");
+                }
+                else 
+                {
+                    if (!t.ContainingNamespace.IsGlobalNamespace)
+                    {
+                        sb.Append(t.ContainingNamespace);
+                        sb.Append(".");
+                    }
+                }
+
+                sb.Append(t.Name);
+                sb.Append(suffix);
+                sb.Append(ExtractTypeArguments(context, t, replaceWithViewType));
+            }
+            
+            try
+            {
+                AppendTypePath(type, suffix);
+
+                return sb.ToString();
+            }
+            finally
+            {
+                ReleaseStringBuilder(sb);
+            }
+        }
+
+        public static TypePath GetTypePath(ITypeSymbol type)
+        {
+            if (type is ITypeParameterSymbol) return new TypePath(type.Name);
+
+            return new TypePath(type);
         }
 
         public static bool IsSerializableArrayOrList(UniTypedGeneratorContext context, ITypeSymbol symbol,

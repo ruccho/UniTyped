@@ -8,7 +8,6 @@ public abstract class TypedViewDefinition
     public abstract bool IsDirectAccess { get; }
 
     public abstract bool Match(UniTypedGeneratorContext context, ITypeSymbol type);
-    public abstract void GenerateView(UniTypedGeneratorContext context, StringBuilder sourceBuilder);
 
     public abstract string GetViewTypeSyntax(UniTypedGeneratorContext context, ITypeSymbol type);
 
@@ -25,17 +24,23 @@ public abstract class TypedViewDefinition
                 }
 """;
     }
+
 }
 
 public abstract class BuiltinViewDefinition : TypedViewDefinition
 {
-    public override void GenerateView(UniTypedGeneratorContext context, StringBuilder sourceBuilder)
-    {
-    }
 }
 
 public abstract class GeneratedViewDefinition : TypedViewDefinition
 {
+    public abstract void Resolve(UniTypedGeneratorContext context);
+
+    public abstract TypePath GetFullTypePath(UniTypedGeneratorContext context);
+    
+    public abstract void GenerateViewTypeOpen(UniTypedGeneratorContext context, StringBuilder sourceBuilder); 
+
+    public abstract void GenerateViewTypeContent(UniTypedGeneratorContext context, StringBuilder sourceBuilder);
+    public abstract void GenerateViewTypeClose(UniTypedGeneratorContext context, StringBuilder sourceBuilder); 
 }
 
 public class UnsuuportedViewDefinition : BuiltinViewDefinition

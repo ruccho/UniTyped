@@ -240,6 +240,7 @@ MonoBehaviour:
   texture: {fileID: 0}
   serializeReference:
     rid: 2132984785687281858
+  ulongValue: 18446744073709551615
   references:
     version: 2
     RefIds:

@@ -266,19 +266,11 @@ namespace UniTyped.Editor
 #else
             get
             {
-                Span<long> val = stackalloc long[1]
-                {
-                    Property.longValue
-                };
-                return MemoryMarshal.Cast<long, ulong>(val)[0];
+                return unchecked((ulong)Property.longValue);
             }
             set
             {
-                Span<ulong> val = stackalloc ulong[1]
-                {
-                    value
-                };
-                Property.longValue = MemoryMarshal.Cast<ulong, long>(val)[0];
+                Property.longValue = unchecked((long)value);
             }
 #endif
         }
