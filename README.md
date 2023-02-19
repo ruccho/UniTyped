@@ -51,17 +51,18 @@ public class ExampleEditor : UnityEditor.Editor
 #endif
 ```
 
-## Supported Serializable Types
+## Supported Types
 
 See also: https://docs.unity3d.com/Manual/script-Serialization.html
 
- - Primitive C# types (`byte`,`sbyte`,`short`,`ushort`,`int`,`uint`,`long`,`ulong`,`float`,`double`,`bool`,`string`,`char`)
- - Built-in Unity Types (`AnimationCurve`,`BoundsInt`,`Bounds`,`Color`,`Hash128`,`Quaternion`,`RectInt`,`Rect`,`Vector2Int`,`Vector2`,`Vector3Int`,`Vector3`,`Vector4`)
+ - Primitive C# types (`byte`, `sbyte`, `short`, `ushort`, `int`, `uint`, `long`, `ulong`, `float`, `double`, `bool`, `string`, `char`)
+ - Built-in Unity Types (`AnimationCurve`, `BoundsInt`, `Bounds`, `Color`, `Hash128`, `Quaternion`, `RectInt`, `Rect`, `Vector2Int`, `Vector2`, `Vector3Int`, `Vector3`, `Vector4`)
  - Enum types (32 bites or smaller)
  - References to objects that derive from `UnityEngine.Object`
  - Custom classes / structs with `[Serializable]`
- - Array / List<T> that element type is also serializable
+ - Array / List<T> with serializable element type
  - Fixed-size buffers
+ - `[SerializeReference]` fields
 
 ```csharp
 
