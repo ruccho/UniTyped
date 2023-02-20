@@ -8,7 +8,8 @@ UniTyped is a source generator for Unity that provides strongly typed access to 
 - **Less Heap Allocations**:  Generated code is struct-based and designed to avoid boxing; It is suitable for repeated invocations from OnInspectorGUI() and other editor codes, making your editor experience better.
 
 ## Requirements
- - Unity 2021.3 or newer
+ - Fully supported in Unity 2021.2 and later
+ - In Unity 2021.1 and below, UniTyped features can be used with [Manual Generator](#manual-generator)
 
 ## Installation
 Add git URL `https://github.com/ruccho/UniTyped.git?path=/Packages/com.ruccho.unityped` from UPM.
@@ -263,3 +264,29 @@ public class ExampleEditor : UnityEditor.Editor
  - This project is currently experimental and breaking changes may be made.
  - It may not cover all use cases. Please let me know by issues if you notice anything.
 
+
+## Manual Generator
+By default, UniType uses the functionality of the Roslyn source generator available in Unity 2021.2 and later. In Unity 2021.1 and below, you can use UniType with manual generator provided as individual package.
+
+### Requirements
+
+ - .NET runtime (supports `netcoreapp3.1` target)
+    - ensure `dotnet` cli tool is available
+ - MSBuild (included in Visual Studio or .NET SDK)
+
+### Installation
+
+Add git URL `https://github.com/ruccho/UniTyped.git?path=/Packages/com.ruccho.unityped.manualgenerator` from Package Manager.
+
+### Usage
+
+1. Create generator profile asset from `Create` > `UniTyped` > `Manual Generator Profile` in project view.
+2. Add generator item.
+3. Register `csproj` path of the project contains target scripts.
+4. Register output C# path. (will be overwritten!)
+5. Click `Generate` button.
+
+![image](https://user-images.githubusercontent.com/16096562/220120237-1fb1afa2-cd56-4b4f-80c6-aa1b3269a24e.png)
+
+### Hint
+ - Executable of manual generator `UniTyped.Generator.Standalone.exe` can be found in `Packages/com.ruccho.unityped.manualgenerator/Editor/~Executable/netcoreapp3.1`. You can use it from commandline with options `--ptojectPath=<CSPROJ PATH> --output=<OUTPUT SCRIPT PATH>`.
