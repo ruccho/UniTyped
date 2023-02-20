@@ -1,0 +1,18 @@
+{
+    "name": "UniTyped.Generator.Manual.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:faa46429b799de9469a151b32a57dbf2"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

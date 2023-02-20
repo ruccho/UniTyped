@@ -6,6 +6,12 @@
       "source": "embedded",
       "dependencies": {}
     },
+    "com.ruccho.unityped.manualgenerator": {
+      "version": "file:com.ruccho.unityped.manualgenerator",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "com.unity.2d.animation": {
       "version": "7.0.8",
       "depth": 1,

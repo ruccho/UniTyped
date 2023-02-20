@@ -12,7 +12,7 @@ namespace UniTyped.Editor
 {
     public interface ISerializedPropertyView
     {
-        public SerializedProperty Property { get; set; }
+        SerializedProperty Property { get; set; }
     }
 
     public struct SerializedPropertyViewUnsupported : ISerializedPropertyView
@@ -22,7 +22,7 @@ namespace UniTyped.Editor
 
     public interface ISerializedPropertyView<T> : ISerializedPropertyView
     {
-        public T Value { get; set; }
+        T Value { get; set; }
     }
 
     public struct SerializedPropertyViewArray<TElementView> : IEnumerable<TElementView>
@@ -85,7 +85,7 @@ namespace UniTyped.Editor
 
             public static Enumerator Get(SerializedPropertyViewArray<TElementView> target)
             {
-                if (pool.TryPeek(out var pooled))
+                if (pool.Count > 0)
                 {
                     var popped = pool.Pop();
                     popped.target = target;
@@ -166,15 +166,19 @@ namespace UniTyped.Editor
         }
     }
 
-    public struct SerializedPropertyViewManagedReference<T> : ISerializedPropertyView<T>
+    public struct SerializedPropertyViewManagedReference<T> : ISerializedPropertyView
     {
         public SerializedProperty Property { get; set; }
 
+#if UNITY_2019_3_OR_NEWER
         public T Value
         {
+#if UNITY_2021_2_OR_NEWER
             get => (T)Property.managedReferenceValue;
+#endif
             set => Property.managedReferenceValue = value;
         }
+#endif
     }
 
     public struct SerializedPropertyViewByte : ISerializedPropertyView<byte>
@@ -264,14 +268,8 @@ namespace UniTyped.Editor
             get => Property.ulongValue;
             set => Property.ulongValue = value;
 #else
-            get
-            {
-                return unchecked((ulong)Property.longValue);
-            }
-            set
-            {
-                Property.longValue = unchecked((long)value);
-            }
+            get { return unchecked((ulong)Property.longValue); }
+            set { Property.longValue = unchecked((long)value); }
 #endif
         }
     }
@@ -379,7 +377,8 @@ namespace UniTyped.Editor
         }
     }
 
-    public struct SerializedPropertyViewHash128 : ISerializedPropertyView<Hash128>
+#if UNITY_2021_1_OR_NEWER
+public struct SerializedPropertyViewHash128 : ISerializedPropertyView<Hash128>
     {
         public SerializedProperty Property { get; set; }
 
@@ -389,6 +388,7 @@ namespace UniTyped.Editor
             set => Property.hash128Value = value;
         }
     }
+#endif
 
     public struct SerializedPropertyViewQuaternion : ISerializedPropertyView<Quaternion>
     {

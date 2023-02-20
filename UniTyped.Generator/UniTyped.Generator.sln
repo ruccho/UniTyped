@@ -1,6 +1,10 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UniTyped.Generator", "UniTyped.Generator.csproj", "{EBC858D0-1024-4DEB-98EB-56398DE1F69C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UniTyped.Generator.Core", "UniTyped.Generator.Core\UniTyped.Generator.Core.csproj", "{EBC858D0-1024-4DEB-98EB-56398DE1F69C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UniTyped.Generator.Standalone", "UniTyped.Generator.Standalone\UniTyped.Generator.Standalone.csproj", "{149E47BC-DE74-4142-88F6-3A71D08B5890}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UniTyped.Generator.Unity", "UniTyped.Generator.Unity\UniTyped.Generator.Unity.csproj", "{FA566C77-0AC3-4BC7-B1A1-52EA901F2A46}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -12,5 +16,13 @@ Global
 		{EBC858D0-1024-4DEB-98EB-56398DE1F69C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EBC858D0-1024-4DEB-98EB-56398DE1F69C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EBC858D0-1024-4DEB-98EB-56398DE1F69C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{149E47BC-DE74-4142-88F6-3A71D08B5890}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{149E47BC-DE74-4142-88F6-3A71D08B5890}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{149E47BC-DE74-4142-88F6-3A71D08B5890}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{149E47BC-DE74-4142-88F6-3A71D08B5890}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FA566C77-0AC3-4BC7-B1A1-52EA901F2A46}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FA566C77-0AC3-4BC7-B1A1-52EA901F2A46}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FA566C77-0AC3-4BC7-B1A1-52EA901F2A46}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FA566C77-0AC3-4BC7-B1A1-52EA901F2A46}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
