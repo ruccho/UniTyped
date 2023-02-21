@@ -191,7 +191,7 @@ internal static class Utils
             return new TypePath(type);
         }
 
-        public static bool IsSerializableArrayOrList(UniTypedGeneratorContext context, ITypeSymbol symbol,
+        public static bool IsArrayOrList(UniTypedGeneratorContext context, ITypeSymbol symbol,
             out ITypeSymbol? elementType)
         {
             elementType = null;
@@ -200,7 +200,7 @@ internal static class Utils
             if (symbol is IArrayTypeSymbol arraySymbol)
             {
                 elementType = arraySymbol.ElementType;
-                return IsSerializableType(context, elementType);
+                return true;
             }
 
             //serializable List<T>
@@ -209,11 +209,18 @@ internal static class Utils
                     SymbolEqualityComparer.Default.Equals(namedSymbol.OriginalDefinition, context.List))
                 {
                     elementType = namedSymbol.TypeArguments[0];
-                    return IsSerializableType(context, elementType);
+                    return true;
                 }
             }
 
             return false;
+        }
+
+
+        public static bool IsSerializableArrayOrList(UniTypedGeneratorContext context, ITypeSymbol symbol,
+            out ITypeSymbol? elementType)
+        {
+            return IsArrayOrList(context, symbol, out elementType) && IsSerializableType(context, elementType ?? throw new NullReferenceException());
         }
 
         public static bool IsSerializableType(UniTypedGeneratorContext context, ITypeSymbol symbol)

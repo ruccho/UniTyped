@@ -44,6 +44,14 @@ public class UniTypedGeneratorContext
     public TypedViewDefinition GetTypedView(UniTypedGeneratorContext context, ITypeSymbol type,
         ViewType viewType = ViewType.SerializeField)
     {
+        //Array
+        if (Utils.IsArrayOrList(context, type, out var elementType))
+        {
+            if (viewType is ViewType.SerializeField && Utils.IsSerializableType(context, elementType)) return SerializeFieldArrayViewDefinition.Instance;
+            if(viewType is ViewType.SerializeReferenceField) return ManagedReferenceArrayViewDefinition.Instance;
+            return unsuuportedView;
+        }
+        
         if (viewType == ViewType.SerializeReferenceField)
         {
             return ManagedReferenceViewDefinition.Instance;
@@ -136,7 +144,6 @@ public class UniTypedGeneratorContext
         builtinSerializeFieldViews = new TypedViewDefinition[]
         {
             new TypeParameterViewDefinition(),
-            new ArrayViewDefinition(),
             new DirectValueViewDefinition("global::UniTyped.Editor.SerializedPropertyViewByte",
                 GetSymbol("System.Byte")),
             new DirectValueViewDefinition("global::UniTyped.Editor.SerializedPropertyViewSByte",

@@ -63,7 +63,7 @@ public class ExampleEditor : UnityEditor.Editor
  - `[Serializable]`つきのカスタムクラス・構造体
  - 要素の型がシリアライズ可能な Array / List<T>
  - 固定サイズバッファ
- - `[SerializeReference]` つきのフィールド
+ - `[SerializeReference]` つきの Array / List<T>
 
 ```csharp
 

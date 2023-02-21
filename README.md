@@ -63,7 +63,7 @@ See also: https://docs.unity3d.com/Manual/script-Serialization.html
  - Custom classes / structs with `[Serializable]`
  - Array / List<T> with serializable element type
  - Fixed-size buffers
- - `[SerializeReference]` fields
+ - `[SerializeReference]` values / arrays / lists
 
 ```csharp
 
@@ -142,6 +142,8 @@ public class Example : MonoBehaviour
     // SerializeReference
 
     [SerializeReference] private object someManagedReference = default;
+    [SerializeReference] private object[] someManagedReferenceArray = default;
+    [SerializeReference] private List<object> someManagedReferenceList = default;
 
     // array / list
 

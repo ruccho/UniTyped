@@ -8,6 +8,7 @@ public class Example : MonoBehaviour
 {
     [SerializeField] private int[] someArray1 = default;
     [SerializeField] private List<int> someList = default;
+    [SerializeReference] private List<int> someSerializableArray = default;
 }
 
 
