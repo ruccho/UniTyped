@@ -6,7 +6,7 @@ public class TypeParameterViewDefinition : BuiltinViewDefinition
 {
     public override bool IsDirectAccess => false;
 
-    public override bool Match(UniTypedGeneratorContext context, ITypeSymbol type)
+    public override bool Match(UniTypedGeneratorContext context, ITypeSymbol type, ViewUsage viewUsage)
     {
         return type is ITypeParameterSymbol;
     }

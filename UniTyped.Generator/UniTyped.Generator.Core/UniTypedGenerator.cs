@@ -15,6 +15,7 @@ namespace UniTyped.Generator
             if (compilation.ReferencedAssemblyNames.All(a => a.Name != "UniTyped")) return null;
 
             var sourceBuilder = new StringBuilder();
+            sourceBuilder.AppendLine($"// {DateTime.Now}");
             sourceBuilder.AppendLine("#if UNITY_EDITOR");
             sourceBuilder.AppendLine("class UniTypedGeneratedTracker {}");
 
@@ -29,14 +30,13 @@ namespace UniTyped.Generator
             {
                 sourceBuilder.AppendLine();
                 sourceBuilder.AppendLine("/*");
-                sourceBuilder.AppendLine($"{e.GetType().Name}: {e.Message} {e.StackTrace}");
+                sourceBuilder.AppendLine($"{e.GetType().Name}: {e.Message}");
+                sourceBuilder.AppendLine(e.StackTrace);
                 sourceBuilder.AppendLine("*/");
                 sourceBuilder.AppendLine();
             }
 
             sourceBuilder.AppendLine("#endif");
-
-            //if(context != null) GenerateNamespaceHolders(context, sourceBuilder);
 
             return sourceBuilder.ToString();
         }
@@ -49,12 +49,12 @@ namespace UniTyped.Generator
                 var symbol = semanticModel.GetDeclaredSymbol(uniTypedType) as INamedTypeSymbol;
                 if (symbol == null) continue;
 
-                context.GetTypedView(context, symbol, UniTypedGeneratorContext.ViewType.Root);
+                context.GetTypedView(context, symbol, ViewUsage.Root);
             }
 
-            for (int i = 0; i < context.GeneratedViews.Count; i++)
+            for (int i = 0; i < context.RuntimeViews.Count; i++)
             {
-                var v = context.GeneratedViews[i];
+                var v = context.RuntimeViews[i];
                 v.Resolve(context);
             }
 
@@ -82,29 +82,13 @@ namespace UniTyped.Generator
                 return node;
             }
 
-            foreach (var v in context.GeneratedViews)
+            foreach (var v in context.RuntimeViews.OfType<GeneratedViewDefinition>())
             {
                 var path = v.GetFullTypePath(context);
                 sourceBuilder.AppendLine($"// {path}");
                 var node = GetNode(path);
                 node.View = v;
             }
-
-            void PrintTree(TypePathNode node)
-            {
-                if (!node.IsGlobalNamesapce)
-                {
-                    sourceBuilder.AppendLine($"// < {node.Path.Name} ({node.Path})");
-                    foreach (var c in node.Children) PrintTree(c);
-                    sourceBuilder.AppendLine($"// > {node.Path.Name}");
-                }
-                else
-                {
-                    foreach (var c in node.Children) PrintTree(c);
-                }
-            }
-
-            //PrintTree(globalNamespace);
 
             void GenerateFromTree(TypePathNode node)
             {

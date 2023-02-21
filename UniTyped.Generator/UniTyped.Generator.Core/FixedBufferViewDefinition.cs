@@ -7,9 +7,10 @@ public class FixedBufferViewDefinition : BuiltinViewDefinition
     public static readonly FixedBufferViewDefinition Instance = new FixedBufferViewDefinition();
     public override bool IsDirectAccess => false;
 
-    public override bool Match(UniTypedGeneratorContext context, ITypeSymbol type)
+    public override bool Match(UniTypedGeneratorContext context, ITypeSymbol type, ViewUsage viewUsage)
     {
-        return type is IPointerTypeSymbol pointerTypeSymbol &&
+        return viewUsage == ViewUsage.SerializeField && 
+            type is IPointerTypeSymbol pointerTypeSymbol &&
                Utils.IsPrimitiveSerializableType(pointerTypeSymbol.PointedAtType);
     }
 
@@ -19,7 +20,7 @@ public class FixedBufferViewDefinition : BuiltinViewDefinition
 
         var elementType = pointerTypeSymbol.PointedAtType;
 
-        var elementView = context.GetTypedView(context, elementType);
+        var elementView = context.GetTypedView(context, elementType, ViewUsage.SerializeField);
 
         return
             $"global::UniTyped.Editor.SerializedPropertyViewFixedBuffer<{elementView.GetViewTypeSyntax(context, elementType)}>";

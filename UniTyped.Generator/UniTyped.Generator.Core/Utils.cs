@@ -103,7 +103,7 @@ internal static class Utils
                         }
                         else
                         {
-                            sb.Append(context.GetTypedView(context, param).GetViewTypeSyntax(context, param));
+                            sb.Append(context.GetTypedView(context, param, ViewUsage.SerializeField).GetViewTypeSyntax(context, param));
                         }
                     }
 
@@ -220,10 +220,10 @@ internal static class Utils
         public static bool IsSerializableArrayOrList(UniTypedGeneratorContext context, ITypeSymbol symbol,
             out ITypeSymbol? elementType)
         {
-            return IsArrayOrList(context, symbol, out elementType) && IsSerializableType(context, elementType ?? throw new NullReferenceException());
+            return IsArrayOrList(context, symbol, out elementType) && IsSerializableAsSerializeField(context, elementType ?? throw new NullReferenceException());
         }
 
-        public static bool IsSerializableType(UniTypedGeneratorContext context, ITypeSymbol symbol)
+        public static bool IsSerializableAsSerializeField(UniTypedGeneratorContext context, ITypeSymbol symbol)
         {
             if (symbol is ITypeParameterSymbol) return true; //resolve runtime
 

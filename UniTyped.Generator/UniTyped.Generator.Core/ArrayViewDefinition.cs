@@ -2,44 +2,66 @@
 
 namespace UniTyped.Generator;
 
-public class SerializeFieldArrayViewDefinition : BuiltinViewDefinition
+public class SerializeFieldArrayViewDefinition : RuntimeViewDefinition
 {
-    public static readonly SerializeFieldArrayViewDefinition Instance = new SerializeFieldArrayViewDefinition();
     public override bool IsDirectAccess => false;
 
-    public override bool Match(UniTypedGeneratorContext context, ITypeSymbol type)
+    private ITypeSymbol elementType = default;
+    private TypedViewDefinition resolvedElementView = default;
+
+    public SerializeFieldArrayViewDefinition(ITypeSymbol elementType)
     {
-        return Utils.IsSerializableArrayOrList(context, type, out _);
+        this.elementType = elementType;
+    }
+
+    public override bool Match(UniTypedGeneratorContext context, ITypeSymbol type, ViewUsage viewUsage)
+    {
+        return viewUsage == ViewUsage.SerializeField &&
+               Utils.IsSerializableArrayOrList(context, type, out var elementType) &&
+               SymbolEqualityComparer.Default.Equals(elementType, this.elementType);
+    }
+
+    public override void Resolve(UniTypedGeneratorContext context)
+    {
+        resolvedElementView = context.GetTypedView(context, elementType, ViewUsage.SerializeField);
     }
 
     public override string GetViewTypeSyntax(UniTypedGeneratorContext context, ITypeSymbol type)
     {
-        Utils.IsSerializableArrayOrList(context, type, out var elementType);
-
-        var elementView = context.GetTypedView(context, elementType ?? throw new NullReferenceException(), UniTypedGeneratorContext.ViewType.SerializeField);
-
         return
-            $"global::UniTyped.Editor.SerializedPropertyViewArray<{elementView.GetViewTypeSyntax(context, elementType)}>";
+            $"global::UniTyped.Editor.SerializedPropertyViewArray<{resolvedElementView.GetViewTypeSyntax(context, elementType)}>";
     }
+
+    public override string ToString() => $"{GetType().Name} ({elementType})";
 }
 
-public class ManagedReferenceArrayViewDefinition : BuiltinViewDefinition
+public class ManagedReferenceArrayViewDefinition : RuntimeViewDefinition
 {
-    public static readonly ManagedReferenceArrayViewDefinition Instance = new ManagedReferenceArrayViewDefinition();
     public override bool IsDirectAccess => false;
 
-    public override bool Match(UniTypedGeneratorContext context, ITypeSymbol type)
+    private ITypeSymbol elementType = default;
+    private TypedViewDefinition resolvedElementView = default;
+
+    public ManagedReferenceArrayViewDefinition(ITypeSymbol elementType)
     {
-        return Utils.IsArrayOrList(context, type, out _);
+        this.elementType = elementType;
+    }
+
+    public override bool Match(UniTypedGeneratorContext context, ITypeSymbol type, ViewUsage viewUsage)
+    {
+        return viewUsage == ViewUsage.SerializeReferenceField &&
+               Utils.IsArrayOrList(context, type, out var elementType) &&
+               SymbolEqualityComparer.Default.Equals(elementType, this.elementType);
+    }
+
+    public override void Resolve(UniTypedGeneratorContext context)
+    {
+        resolvedElementView = context.GetTypedView(context, elementType, ViewUsage.SerializeReferenceField);
     }
 
     public override string GetViewTypeSyntax(UniTypedGeneratorContext context, ITypeSymbol type)
     {
-        Utils.IsArrayOrList(context, type, out var elementType);
-
-        var elementView = context.GetTypedView(context, elementType ?? throw new NullReferenceException(), UniTypedGeneratorContext.ViewType.SerializeReferenceField);
-
         return
-            $"global::UniTyped.Editor.SerializedPropertyViewArray<{elementView.GetViewTypeSyntax(context, elementType)}>";
+            $"global::UniTyped.Editor.SerializedPropertyViewArray<{resolvedElementView.GetViewTypeSyntax(context, elementType)}>";
     }
 }

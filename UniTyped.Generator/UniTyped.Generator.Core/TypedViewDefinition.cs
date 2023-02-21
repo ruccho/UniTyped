@@ -7,7 +7,7 @@ public abstract class TypedViewDefinition
 {
     public abstract bool IsDirectAccess { get; }
 
-    public abstract bool Match(UniTypedGeneratorContext context, ITypeSymbol type);
+    public abstract bool Match(UniTypedGeneratorContext context, ITypeSymbol type, ViewUsage viewUsage);
 
     public abstract string GetViewTypeSyntax(UniTypedGeneratorContext context, ITypeSymbol type);
 
@@ -31,9 +31,13 @@ public abstract class BuiltinViewDefinition : TypedViewDefinition
 {
 }
 
-public abstract class GeneratedViewDefinition : TypedViewDefinition
+public abstract class RuntimeViewDefinition : TypedViewDefinition
 {
     public abstract void Resolve(UniTypedGeneratorContext context);
+}
+
+public abstract class GeneratedViewDefinition : RuntimeViewDefinition
+{
 
     public abstract TypePath GetFullTypePath(UniTypedGeneratorContext context);
     
@@ -43,11 +47,11 @@ public abstract class GeneratedViewDefinition : TypedViewDefinition
     public abstract void GenerateViewTypeClose(UniTypedGeneratorContext context, StringBuilder sourceBuilder); 
 }
 
-public class UnsuuportedViewDefinition : BuiltinViewDefinition
+public class UnsupportedViewDefinition : BuiltinViewDefinition
 {
     public override bool IsDirectAccess => false;
 
-    public override bool Match(UniTypedGeneratorContext context, ITypeSymbol type)
+    public override bool Match(UniTypedGeneratorContext context, ITypeSymbol type, ViewUsage viewUsage)
     {
         return true;
     }

@@ -16,9 +16,9 @@ public class EnumValueViewDefinition : GeneratedViewDefinition
         EnumType = enumType;
     }
 
-    public override bool Match(UniTypedGeneratorContext context, ITypeSymbol type)
+    public override bool Match(UniTypedGeneratorContext context, ITypeSymbol type, ViewUsage viewUsage)
     {
-        return SymbolEqualityComparer.Default.Equals(type, EnumType);
+        return viewUsage == ViewUsage.SerializeField && SymbolEqualityComparer.Default.Equals(type, EnumType);
     }
 
     public override string GetViewTypeSyntax(UniTypedGeneratorContext context, ITypeSymbol type)

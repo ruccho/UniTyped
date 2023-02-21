@@ -29,16 +29,17 @@ public class CustomValueViewDefinition : GeneratedViewDefinition
 
     public CustomValueViewDefinition(UniTypedGeneratorContext context, ITypeSymbol typeSymbol)
     {
-        var symbol = TemplateTypeSymbol = typeSymbol;
+        if (typeSymbol is INamedTypeSymbol namedType && namedType.IsGenericType) typeSymbol = namedType.OriginalDefinition;
+        TemplateTypeSymbol = typeSymbol;
         IsUnityEngineObject = Utils.IsDerivedFrom(typeSymbol, context.UnityEngineObject);
     }
 
-    public override bool Match(UniTypedGeneratorContext context, ITypeSymbol type)
+    public override bool Match(UniTypedGeneratorContext context, ITypeSymbol type, ViewUsage viewUsage)
     {
         if (type is INamedTypeSymbol { IsGenericType: true } namedType)
             type = namedType.OriginalDefinition;
 
-        return !IsUnityEngineObject && SymbolEqualityComparer.Default.Equals(type, TemplateTypeSymbol);
+        return SymbolEqualityComparer.Default.Equals(type, TemplateTypeSymbol);
     }
 
     public override void Resolve(UniTypedGeneratorContext context)
@@ -92,18 +93,18 @@ public class CustomValueViewDefinition : GeneratedViewDefinition
                 if (!isSerializeField && !isSerializeReference) continue;
 
                 var viewType = isSerializeField
-                    ? UniTypedGeneratorContext.ViewType.SerializeField
-                    : UniTypedGeneratorContext.ViewType.SerializeReferenceField;
+                    ? ViewUsage.SerializeField
+                    : ViewUsage.SerializeReferenceField;
 
                 TypedViewDefinition view;
                 if (field.IsFixedSizeBuffer)
                 {
-                    if (!FixedBufferViewDefinition.Instance.Match(context, type)) continue;
+                    if (!FixedBufferViewDefinition.Instance.Match(context, type, viewType)) continue;
                     view = FixedBufferViewDefinition.Instance;
                 }
                 else
                 {
-                    if (isSerializeField && !Utils.IsSerializableType(context, type)) continue;
+                    if (isSerializeField && !Utils.IsSerializableAsSerializeField(context, type)) continue;
                     view = context.GetTypedView(context, field.Type, viewType);
                 }
 

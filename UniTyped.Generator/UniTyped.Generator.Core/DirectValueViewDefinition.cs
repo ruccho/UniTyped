@@ -16,9 +16,9 @@ public
         FieldTypeSymbol = fieldTypeSymbol;
     }
 
-    public override bool Match(UniTypedGeneratorContext context, ITypeSymbol type)
+    public override bool Match(UniTypedGeneratorContext context, ITypeSymbol type, ViewUsage viewUsage)
     {
-        return SymbolEqualityComparer.Default.Equals(type, FieldTypeSymbol);
+        return viewUsage == ViewUsage.SerializeField && SymbolEqualityComparer.Default.Equals(type, FieldTypeSymbol);
     }
 
     public override string GetViewTypeSyntax(UniTypedGeneratorContext context, ITypeSymbol type) =>

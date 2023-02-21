@@ -26,87 +26,86 @@ public class UniTypedGeneratorContext
     public INamedTypeSymbol Vector4 { get; }
     public INamedTypeSymbol UniTypedField { get; }
 
-    private readonly TypedViewDefinition[] builtinSerializeFieldViews;
+    private readonly BuiltinViewDefinition[] builtinSerializeFieldViews;
 
-    public IReadOnlyList<GeneratedViewDefinition> GeneratedViews => generatedViews;
+    public IReadOnlyList<RuntimeViewDefinition> RuntimeViews => runtimeViews;
 
-    private List<GeneratedViewDefinition> generatedViews = new List<GeneratedViewDefinition>();
+    private List<RuntimeViewDefinition> runtimeViews = new List<RuntimeViewDefinition>();
 
-    private static readonly UnsuuportedViewDefinition unsuuportedView = new UnsuuportedViewDefinition();
-
-    public enum ViewType
-    {
-        Root,
-        SerializeField,
-        SerializeReferenceField
-    }
+    private static readonly UnsupportedViewDefinition unsupportedView = new UnsupportedViewDefinition();
 
     public TypedViewDefinition GetTypedView(UniTypedGeneratorContext context, ITypeSymbol type,
-        ViewType viewType = ViewType.SerializeField)
+        ViewUsage viewUsage)
     {
+        foreach (var v in builtinSerializeFieldViews)
+        {
+            if (v.Match(this, type, viewUsage)) return v;
+        }
+
+        var custom = GetOrAddObjectView(context, type, viewUsage);
+        if (custom.Match(this, type, viewUsage)) return custom;
+            
+        else throw new InvalidOperationException($"Created view doesn't match target type: {type.MetadataName}, {custom}");
+        
+        //throw new InvalidOperationException("New view is null");
+
+        return unsupportedView;
+    }
+
+    private TypedViewDefinition GetOrAddObjectView(UniTypedGeneratorContext context, ITypeSymbol type,
+        ViewUsage viewUsage)
+    {
+
+        foreach (var v in runtimeViews)
+        {
+            if (v.Match(this, type, viewUsage)) return v;
+        }
+
+        var newView = CreateRuntimeView(context, type, viewUsage);
+
+        if (newView != null)
+        {
+            runtimeViews.Add(newView);
+            return newView;
+        }
+        
+        //throw new InvalidOperationException("New view is null");
+        return unsupportedView;
+    }
+
+    private RuntimeViewDefinition? CreateRuntimeView(UniTypedGeneratorContext context, ITypeSymbol type,
+        ViewUsage viewUsage)
+    {
+        
         //Array
         if (Utils.IsArrayOrList(context, type, out var elementType))
         {
-            if (viewType is ViewType.SerializeField && Utils.IsSerializableType(context, elementType)) return SerializeFieldArrayViewDefinition.Instance;
-            if(viewType is ViewType.SerializeReferenceField) return ManagedReferenceArrayViewDefinition.Instance;
-            return unsuuportedView;
+            if (viewUsage is ViewUsage.SerializeField && Utils.IsSerializableAsSerializeField(context, elementType)) return new SerializeFieldArrayViewDefinition(elementType);
+            if(viewUsage is ViewUsage.SerializeReferenceField) return new ManagedReferenceArrayViewDefinition(elementType);
+            throw new InvalidOperationException("Unserializable");
+            //return null;
         }
         
-        if (viewType == ViewType.SerializeReferenceField)
+        if (viewUsage == ViewUsage.SerializeReferenceField)
         {
-            return ManagedReferenceViewDefinition.Instance;
+            return new ManagedReferenceViewDefinition(type);
         }
-
-        if (viewType == ViewType.SerializeField)
+        
+        if (viewUsage == ViewUsage.SerializeField && Utils.IsDerivedFrom(type, context.UnityEngineObject))
         {
-            foreach (var v in builtinSerializeFieldViews)
-            {
-                if (v.Match(this, type)) return v;
-            }
+            return new UnityEngineObjectReferenceValueViewDefinition(type);
         }
-
-        //original generics
-        if (type is INamedTypeSymbol namedType)
-        {
-            if (namedType.IsGenericType) namedType = namedType.OriginalDefinition;
-            var custom = GetOrAddObjectView(context, namedType, viewType);
-            if (custom.Match(this, type)) return custom;
-        }
-
-        return unsuuportedView;
-    }
-
-    private TypedViewDefinition GetOrAddObjectView(UniTypedGeneratorContext context, INamedTypeSymbol type,
-        ViewType viewType)
-    {
-        if (viewType == ViewType.SerializeField && Utils.IsDerivedFrom(type, context.UnityEngineObject))
-        {
-            return UnityEngineObjectReferenceValueViewDefinition.Instance;
-        }
-
-        foreach (var v in generatedViews)
-        {
-            if (v.Match(this, type)) return v;
-        }
-
-        GeneratedViewDefinition newView;
 
         switch (type.TypeKind)
         {
             case TypeKind.Class:
             case TypeKind.Struct:
-                newView = new CustomValueViewDefinition(this, type);
-                break;
+                return new CustomValueViewDefinition(this, type);
             case TypeKind.Enum:
-                newView = new EnumValueViewDefinition(type);
-                break;
+                return new EnumValueViewDefinition(type);
             default:
                 throw new ArgumentOutOfRangeException();
         }
-
-        generatedViews.Add(newView);
-
-        return newView;
     }
 
     public UniTypedGeneratorContext(Compilation compilation, IUniTypedCollector collector)
@@ -141,7 +140,7 @@ public class UniTypedGeneratorContext
 
         UniTypedField = GetSymbol("UniTyped.UniTypedFieldAttribute");
 
-        builtinSerializeFieldViews = new TypedViewDefinition[]
+        builtinSerializeFieldViews = new BuiltinViewDefinition[]
         {
             new TypeParameterViewDefinition(),
             new DirectValueViewDefinition("global::UniTyped.Editor.SerializedPropertyViewByte",
@@ -190,4 +189,11 @@ public class UniTypedGeneratorContext
             new DirectValueViewDefinition("global::UniTyped.Editor.SerializedPropertyViewVector4", Vector4),
         };
     }
+}
+
+public enum ViewUsage
+{
+    Root,
+    SerializeField,
+    SerializeReferenceField
 }

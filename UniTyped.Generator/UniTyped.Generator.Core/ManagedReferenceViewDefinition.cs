@@ -3,13 +3,24 @@ using Microsoft.CodeAnalysis;
 
 namespace UniTyped.Generator;
 
-public class ManagedReferenceViewDefinition : BuiltinViewDefinition
+public class ManagedReferenceViewDefinition : RuntimeViewDefinition
 {
-    public static readonly ManagedReferenceViewDefinition Instance = new ManagedReferenceViewDefinition();
     public override bool IsDirectAccess => true;
-    public override bool Match(UniTypedGeneratorContext context, ITypeSymbol type)
+
+    private ITypeSymbol type;
+
+    public ManagedReferenceViewDefinition(ITypeSymbol type)
     {
-        return true;
+        this.type = type;
+    }
+
+    public override void Resolve(UniTypedGeneratorContext context)
+    {
+    }
+
+    public override bool Match(UniTypedGeneratorContext context, ITypeSymbol type, ViewUsage viewUsage)
+    {
+        return viewUsage == ViewUsage.SerializeReferenceField && SymbolEqualityComparer.Default.Equals(type, this.type);
     }
 
     public override string GetViewTypeSyntax(UniTypedGeneratorContext context, ITypeSymbol type)
