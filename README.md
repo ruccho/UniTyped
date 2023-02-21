@@ -289,4 +289,4 @@ Add git URL `https://github.com/ruccho/UniTyped.git?path=/Packages/com.ruccho.un
 ![image](https://user-images.githubusercontent.com/16096562/220120237-1fb1afa2-cd56-4b4f-80c6-aa1b3269a24e.png)
 
 ### Hint
- - Executable of manual generator `UniTyped.Generator.Standalone.exe` can be found in `Packages/com.ruccho.unityped.manualgenerator/Editor/~Executable/netcoreapp3.1`. You can use it from commandline with options `--project=<CSPROJ PATH> --output=<OUTPUT SCRIPT PATH>`.
+ - Executable of manual generator `UniTyped.Generator.Standalone.exe` can be found in `Packages/com.ruccho.unityped.manualgenerator/Editor/Executable~/netcoreapp3.1`. You can use it from commandline with options `--project=<CSPROJ PATH> --output=<OUTPUT SCRIPT PATH>`.

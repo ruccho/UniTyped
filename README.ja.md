@@ -289,4 +289,4 @@ Package Manager から次の git URL を追加してください： `https://git
 ![image](https://user-images.githubusercontent.com/16096562/220120237-1fb1afa2-cd56-4b4f-80c6-aa1b3269a24e.png)
 
 ### ヒント
- - Manual generator の実行可能ファイル `UniTyped.Generator.Standalone.exe` が `Packages/com.ruccho.unityped.manualgenerator/Editor/~Executable/netcoreapp3.1` で見つかります。 このツールは次のオプションでコマンドラインから使用できます： `--project=<CSPROJ PATH> --output=<OUTPUT SCRIPT PATH>`.
+ - Manual generator の実行可能ファイル `UniTyped.Generator.Standalone.exe` が `Packages/com.ruccho.unityped.manualgenerator/Editor/Executable~/netcoreapp3.1` で見つかります。 このツールは次のオプションでコマンドラインから使用できます： `--project=<CSPROJ PATH> --output=<OUTPUT SCRIPT PATH>`.
