@@ -71,9 +71,9 @@ public class EnumValueViewDefinition : GeneratedViewDefinition
         sourceBuilder.AppendLine($$"""
         public global::UnityEditor.SerializedProperty Property { get; set; }
 
-        public {{Utils.GetFullQualifiedTypeName(context, symbol, false)}} Value
+        public global::{{Utils.GetFullQualifiedTypeName(context, symbol, false)}} Value
         {
-            get => ({{Utils.GetFullQualifiedTypeName(context, symbol, false)}}) Property.enumValueIndex;
+            get => (global::{{Utils.GetFullQualifiedTypeName(context, symbol, false)}}) Property.enumValueIndex;
             set => Property.enumValueIndex = (int) value;
         }
 """);

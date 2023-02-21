@@ -202,7 +202,7 @@ public class CustomValueViewDefinition : GeneratedViewDefinition
 """);
             if (!forceNested && view.IsDirectAccess)
             {
-                var fullQualifiedTypeName = Utils.GetFullQualifiedTypeName(context, type, false);
+                var fullQualifiedTypeName = "global::" + Utils.GetFullQualifiedTypeName(context, type, false);
 
                 sourceBuilder.AppendLine($$"""
         private {{viewTypeSyntax}} {{viewPropertyName}}

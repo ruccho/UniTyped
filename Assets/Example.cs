@@ -105,6 +105,8 @@ public class ExampleEditor : UnityEditor.Editor
         {
             Target = serializedObject
         };
+        
+        //UniTyped.Generated.Example.somee
 
         // array access
         for (int i = 0; i < view.someArray.Length; i++)
