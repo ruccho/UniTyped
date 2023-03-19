@@ -24,7 +24,8 @@ public class UniTypedGeneratorContext
     public INamedTypeSymbol Vector3Int { get; }
     public INamedTypeSymbol Vector3 { get; }
     public INamedTypeSymbol Vector4 { get; }
-    public INamedTypeSymbol UniTypedField { get; }
+    public INamedTypeSymbol UniTypedFieldAttribute { get; }
+    public INamedTypeSymbol UniTypedMaterialViewAttribute { get; }
 
     private readonly BuiltinViewDefinition[] builtinSerializeFieldViews;
 
@@ -138,7 +139,8 @@ public class UniTypedGeneratorContext
         Vector3 = GetSymbol("UnityEngine.Vector3");
         Vector4 = GetSymbol("UnityEngine.Vector4");
 
-        UniTypedField = GetSymbol("UniTyped.UniTypedFieldAttribute");
+        UniTypedFieldAttribute = GetSymbol("UniTyped.UniTypedFieldAttribute");
+        UniTypedMaterialViewAttribute = GetSymbol("UniTyped.UniTypedMaterialViewAttribute");
 
         builtinSerializeFieldViews = new BuiltinViewDefinition[]
         {

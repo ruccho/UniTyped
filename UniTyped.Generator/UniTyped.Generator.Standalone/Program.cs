@@ -62,16 +62,24 @@ catch (Exception e)
 class UniTypedCollector : CSharpSyntaxWalker, IUniTypedCollector
 {
     public HashSet<TypeDeclarationSyntax> UniTypedTypes { get; } = new();
+    public HashSet<TypeDeclarationSyntax> MaterialViews { get; } = new();
 
     private void VisitTypeDeclaration(TypeDeclarationSyntax node)
     {
         if (node.AttributeLists.Count > 0)
         {
-            if (node.AttributeLists.SelectMany(x => x.Attributes)
-                .Any(x => x.Name.ToString() is "UniTyped" or "UniTyped.UniTyped" or "UniTypedAttribute"
+            var attributes = node.AttributeLists.SelectMany(x => x.Attributes);
+            if (attributes.Any(x => x.Name.ToString() is "UniTyped" or "UniTyped.UniTyped" or "UniTypedAttribute"
                     or "UniTyped.UniTypedAttribute"))
             {
                 UniTypedTypes.Add(node);
+            }
+
+            if (attributes.Any(x => x.Name.ToString() is "UniTypedMaterialView"
+                    or "UniTypedMaterialViewAttribute" or "UniTyped.UniTypedMaterialView"
+                    or "UniTyped.UniTypedMaterialViewAttribute"))
+            {
+                MaterialViews.Add(node);
             }
         }
     }

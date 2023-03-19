@@ -55,7 +55,7 @@ public class CustomValueViewDefinition : GeneratedViewDefinition
             foreach (var field in fields)
             {
                 var uniTypedField = field.GetAttributes().FirstOrDefault(a =>
-                    SymbolEqualityComparer.Default.Equals(a.AttributeClass, context.UniTypedField));
+                    SymbolEqualityComparer.Default.Equals(a.AttributeClass, context.UniTypedFieldAttribute));
 
                 bool forceNested = false;
                 if (uniTypedField != null)

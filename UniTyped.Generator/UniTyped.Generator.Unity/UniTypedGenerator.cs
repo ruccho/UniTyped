@@ -16,6 +16,7 @@ namespace UniTyped.Generator.Unity
             }
 
             public HashSet<TypeDeclarationSyntax> UniTypedTypes { get; } = new HashSet<TypeDeclarationSyntax>();
+            public HashSet<TypeDeclarationSyntax> MaterialViews { get; } = new HashSet<TypeDeclarationSyntax>();
 
             public void OnVisitSyntaxNode(GeneratorSyntaxContext context)
             {
@@ -27,11 +28,18 @@ namespace UniTyped.Generator.Unity
                     var typeSyntax = (TypeDeclarationSyntax)node;
                     if (typeSyntax.AttributeLists.Count > 0)
                     {
-                        if (typeSyntax.AttributeLists.SelectMany(x => x.Attributes)
-                            .Any(x => x.Name.ToString() is "UniTyped" or "UniTyped.UniTyped" or "UniTypedAttribute"
+                        var attributes = typeSyntax.AttributeLists.SelectMany(x => x.Attributes);
+                        if (attributes.Any(x => x.Name.ToString() is "UniTyped" or "UniTyped.UniTyped" or "UniTypedAttribute"
                                 or "UniTyped.UniTypedAttribute"))
                         {
                             UniTypedTypes.Add(typeSyntax);
+                        }
+
+                        if (attributes.Any(x => x.Name.ToString() is "UniTypedMaterialView"
+                                or "UniTypedMaterialViewAttribute" or "UniTyped.UniTypedMaterialView"
+                                or "UniTyped.UniTypedMaterialViewAttribute"))
+                        {
+                            MaterialViews.Add(typeSyntax);
                         }
                     }
                 }

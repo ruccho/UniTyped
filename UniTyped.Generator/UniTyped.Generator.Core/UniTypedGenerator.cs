@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis.Text;
 using System.Text;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using UniTyped.Generator.MaterialViews;
 
 namespace UniTyped.Generator
 {
@@ -15,7 +16,7 @@ namespace UniTyped.Generator
             if (compilation.ReferencedAssemblyNames.All(a => a.Name != "UniTyped")) return null;
 
             var sourceBuilder = new StringBuilder();
-            sourceBuilder.AppendLine($"// {DateTime.Now}");
+            sourceBuilder.AppendLine($"// Assembly {assembly} {DateTime.Now}");
             sourceBuilder.AppendLine("#if UNITY_EDITOR");
             sourceBuilder.AppendLine("class UniTypedGeneratedTracker {}");
 
@@ -25,6 +26,10 @@ namespace UniTyped.Generator
                 context = new UniTypedGeneratorContext(compilation, collector);
 
                 GenerateViews(context, sourceBuilder);
+
+                sourceBuilder.AppendLine("#endif");
+                
+                UniTypedMaterialViewGenerator.GenerateViews(context, sourceBuilder);
             }
             catch (Exception e)
             {
@@ -35,8 +40,6 @@ namespace UniTyped.Generator
                 sourceBuilder.AppendLine("*/");
                 sourceBuilder.AppendLine();
             }
-
-            sourceBuilder.AppendLine("#endif");
 
             return sourceBuilder.ToString();
         }

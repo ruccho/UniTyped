@@ -17,6 +17,8 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="Irony" Version="1.2.0" />
+      <PackageReference Include="Irony.Interpreter" Version="1.2.0" />
       <PackageReference Include="Microsoft.CodeAnalysis" Version="3.9.0" />
       <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.9.0" />
     </ItemGroup>

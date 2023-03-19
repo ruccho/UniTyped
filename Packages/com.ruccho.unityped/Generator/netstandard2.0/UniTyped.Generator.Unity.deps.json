@@ -27,6 +27,25 @@
           }
         }
       },
+      "Irony/1.2.0": {
+        "runtime": {
+          "lib/netstandard2.0/Irony.dll": {
+            "assemblyVersion": "1.1.0.0",
+            "fileVersion": "1.1.0.0"
+          }
+        }
+      },
+      "Irony.Interpreter/1.2.0": {
+        "dependencies": {
+          "Irony": "1.2.0"
+        },
+        "runtime": {
+          "lib/netstandard2.0/Irony.Interpreter.dll": {
+            "assemblyVersion": "1.1.0.0",
+            "fileVersion": "1.1.0.0"
+          }
+        }
+      },
       "Microsoft.Bcl.AsyncInterfaces/5.0.0": {
         "dependencies": {
           "System.Threading.Tasks.Extensions": "4.5.4"
@@ -803,6 +822,8 @@
       },
       "UniTyped.Generator.Core/1.0.0": {
         "dependencies": {
+          "Irony": "1.2.0",
+          "Irony.Interpreter": "1.2.0",
           "Microsoft.CodeAnalysis": "3.9.0",
           "Microsoft.CodeAnalysis.CSharp": "3.9.0"
         },
@@ -824,6 +845,20 @@
       "sha512": "sha512-rsYXB7+iUPP8AHgQ8JP2UZI2xK2KhjcdGr9E6zX3CsZaTLCaw8M35vaAJRo1rfxeaZEVMuXeaquLVCkZ7JcZ5Q==",
       "path": "humanizer.core/2.2.0",
       "hashPath": "humanizer.core.2.2.0.nupkg.sha512"
+    },
+    "Irony/1.2.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-xobL8fbz01pOacoWPjBw1K1tT4Sell3n0nQlutAGpqJ7R3sEoL+pB1gkWUBm1NcfQ7EAyPfIcAt4LVvAQhB7tg==",
+      "path": "irony/1.2.0",
+      "hashPath": "irony.1.2.0.nupkg.sha512"
+    },
+    "Irony.Interpreter/1.2.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-YwF+zPu8Lwx76gkr/hVIvqRVQ2HvcZaKoXB/aF0X/bc9SYO0W0fBgiXI/DmP76k3YOCzkGttcm5IEXhbiLtK7Q==",
+      "path": "irony.interpreter/1.2.0",
+      "hashPath": "irony.interpreter.1.2.0.nupkg.sha512"
     },
     "Microsoft.Bcl.AsyncInterfaces/5.0.0": {
       "type": "package",

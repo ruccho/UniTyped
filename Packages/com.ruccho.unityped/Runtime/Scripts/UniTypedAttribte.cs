@@ -20,4 +20,14 @@ namespace UniTyped
             
         }
     }
+
+    [AttributeUsage(AttributeTargets.Struct, Inherited = false, AllowMultiple = false)]
+    public class UniTypedMaterialViewAttribute : System.Attribute
+    {
+        public string ShaderPath { get; }
+        public UniTypedMaterialViewAttribute(string shaderPath)
+        {
+            this.ShaderPath = shaderPath;
+        }
+    }
 }
