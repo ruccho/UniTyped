@@ -172,6 +172,7 @@ Create `partial` struct with `UniTypedMaterialView` attribute.
 using UnityEngine;
 using UniTyped;
 
+//specify relative path to this source file
 [UniTypedMaterialView("NewUnlitShader.shader")]
 public partial struct NewUnlitShaderView
 {

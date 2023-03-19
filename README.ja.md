@@ -166,12 +166,13 @@ public class ExampleEditor : UnityEditor.Editor
 
 ## UnityEngine.Materialの型付きビュー
 
-Create `partial` struct with `UniTypedMaterialView` attribute.
+`UniTypedMaterialView` 属性つきの `partial` なstructを作成します。
 
 ```csharp
 using UnityEngine;
 using UniTyped;
 
+//このスクリプトからの相対パスを指定
 [UniTypedMaterialView("NewUnlitShader.shader")]
 public partial struct NewUnlitShaderView
 {
