@@ -1,22 +1,15 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UniTyped;
 
 public class MaterialViewExample : MonoBehaviour
 {
-    [SerializeField] private Material unlitMat = default;
-    
-    void Start()
-    {
-        
-    }
+    [SerializeField] private Material mat = default;
 
     void Update()
     {
         var view = new NewUnlitShaderView()
         {
-            Target = unlitMat
+            Target = mat
         };
         
 

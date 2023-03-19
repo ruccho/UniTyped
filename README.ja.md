@@ -14,7 +14,7 @@ UniTypedは、SerializedObject や SerializedPropertyに対し、型付けされ
 ## インストール
 Package Manager から次の git URL を追加してください：`https://github.com/ruccho/UniTyped.git?path=/Packages/com.ruccho.unityped`
 
-## 使い方
+## シリアライズされたデータへの型付きビュー
 `[UniTyped.UniTyped]`属性をMonoBehaviourやScriptableObject、またはその他のSerializableなカスタムクラスに適用してください。すると、`UniTyped.Generated.[YourNamespace].[YourClass]View` という構造体が使用できるようになります。
 
 ```csharp
@@ -52,7 +52,7 @@ public class ExampleEditor : UnityEditor.Editor
 #endif
 ```
 
-## サポートされている型
+### サポートされている型
 
 参考: https://docs.unity3d.com/Manual/script-Serialization.html
 
@@ -65,101 +65,6 @@ public class ExampleEditor : UnityEditor.Editor
  - 固定サイズバッファ
  - `[SerializeReference]` つきの Array / List<T>
 
-```csharp
-
-using System;
-using System.Collections.Generic;
-using UnityEngine;
-using UniTyped;
-
-[UniTyped]
-public class Example : MonoBehaviour
-{
-    // primitive C# types
-
-    [SerializeField] private byte someByte = default;
-    [SerializeField] private sbyte someSbyte = default;
-    [SerializeField] private short someShort = default;
-    [SerializeField] private ushort someUshort = default;
-    [SerializeField] private int someInt = default;
-    [SerializeField] private uint someUint = default;
-    [SerializeField] private long someLong = default;
-    [SerializeField] private ulong someUlong = default;
-    [SerializeField] private float someFloat = default;
-    [SerializeField] private double someDouble = default;
-    [SerializeField] private bool someBool = default;
-    [SerializeField] private string someString = default;
-    [SerializeField] private char someChar = default;
-
-    // built-in unity types
-
-    [SerializeField] private AnimationCurve someAnimationCurve = default;
-    [SerializeField] private BoundsInt someBoundsInt = default;
-    [SerializeField] private Bounds someBounds = default;
-    [SerializeField] private Color someColor = default;
-    [SerializeField] private Hash128 someHash128 = default;
-    [SerializeField] private Quaternion someQuaternion = default;
-    [SerializeField] private RectInt someRectInt = default;
-    [SerializeField] private Rect someRect = default;
-    [SerializeField] private Vector2Int someVector2Int = default;
-    [SerializeField] private Vector2 someVector2 = default;
-    [SerializeField] private Vector3Int someVector3Int = default;
-    [SerializeField] private Vector3 someVector3 = default;
-    [SerializeField] private Vector4 someVector4 = default;
-
-    // enum
-
-    [SerializeField] private SomeEnum someEnum = default;
-    [SerializeField] private SomeEnumSmall someEnumSmall = default;
-
-    public enum SomeEnum
-    {
-        Option0,
-        Option1
-    }
-
-    public enum SomeEnumSmall : byte
-    {
-        Option0,
-        Option1
-    }
-
-    // UnityEngine.Object
-
-    [SerializeField] private UnityEngine.Object someObject = default;
-    [SerializeField] private Texture2D someTexture = default;
-
-    // custom serializable
-
-    [SerializeField] private SerializableTest someSerializable = default;
-
-    [Serializable]
-    public class SerializableTest
-    {
-        [SerializeField] private int value;
-    }
-
-    // SerializeReference
-
-    [SerializeReference] private object someManagedReference = default;
-
-    // array / list
-
-    [SerializeField] private int[] someArray = default;
-    [SerializeField] private List<int> someList = default;
-
-    // fixed buffer
-
-    [SerializeField] private FixedBufferContainer fixedBufferContainer = default;
-
-    [Serializable]
-    public unsafe struct FixedBufferContainer
-    {
-        [SerializeField] private fixed char fixedBuffer[30];
-    }
-}
-
-```
 
 ### Array / List operation
 
@@ -211,7 +116,7 @@ public class ExampleEditor : UnityEditor.Editor
 ```
 
 
-## コード生成を調整する
+### コード生成を調整する
 `[UniTypedField]`属性のオプションを使用して、コード生成の内容を調整できます。
 
  - `ignore`: そのフィールドをコード生成の対象から外します。
@@ -259,6 +164,50 @@ public class ExampleEditor : UnityEditor.Editor
 #endif
 ```
 
+## UnityEngine.Materialの型付きビュー
+
+Create `partial` struct with `UniTypedMaterialView` attribute.
+
+```csharp
+using UnityEngine;
+using UniTyped;
+
+[UniTypedMaterialView("NewUnlitShader.shader")]
+public partial struct NewUnlitShaderView
+{
+    
+}
+
+public class MaterialViewExample : MonoBehaviour
+{
+    [SerializeField] private Material mat = default;
+
+    void Update()
+    {
+        var view = new NewUnlitShaderView()
+        {
+            Target = mat
+        };
+
+        view._Color = Color.HSVToRGB(Time.time % 1f, 1f, 1f);
+
+    }
+}
+
+```
+
+```shaderlab
+Shader "Unlit/NewUnlitShader"
+{
+    Properties
+    {
+        _MainTex ("Texture", 2D) = "white" {}
+        _Color("Color", Color) = (1, 1, 1, 1)
+    }
+
+    //...
+}
+```
 
 
 ## 制限事項
