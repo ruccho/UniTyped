@@ -176,8 +176,15 @@ using UniTyped;
 [UniTypedMaterialView("NewUnlitShader.shader")]
 public partial struct NewUnlitShaderView
 {
-    
 }
+
+//ShaderGraph is also supported.
+/*
+[UniTypedMaterialView("New Shader Graph.shadergraph")]
+public partial struct NewShaderGraphView
+{
+}
+*/
 
 public class MaterialViewExample : MonoBehaviour
 {

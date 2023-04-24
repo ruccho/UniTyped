@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
+using System.Text;
 using Irony.Parsing;
 using Microsoft.CodeAnalysis;
 
@@ -6,13 +7,19 @@ namespace UniTyped.Generator.MaterialViews;
 
 public static class UniTypedMaterialViewGenerator
 {
+    private static readonly ShaderParser[] parsers = new ShaderParser[]
+    {
+        new ShaderlabParser(new Parser(new ShaderlabGrammar())),
+        new ShaderGraphParser()
+    };
+
     public static void GenerateViews(UniTypedGeneratorContext context, StringBuilder sourceBuilder)
     {
         sourceBuilder.AppendLine($"// UniTypedMaterialViewGenerator");
 
         //return;
 
-        var parser = new Parser(new ShaderlabGrammar());
+        var tempProps = new List<ShaderProperty>();
 
         foreach (var materialViewType in context.Collector.MaterialViews)
         {
@@ -31,10 +38,13 @@ public static class UniTypedMaterialViewGenerator
 
             var shaderFullPath = $"{Path.GetDirectoryName(materialViewType.SyntaxTree.FilePath)}/{shaderPath}";
 
-            var shaderContent = File.ReadAllText(shaderFullPath, Encoding.UTF8);
+            var parser = parsers.FirstOrDefault(p => p.Match(shaderFullPath));
 
-            var root = parser.Parse(shaderContent).Root;
-            if (root.AstNode is not ShaderNode shader) continue;
+            if (parser == null) continue;
+
+            tempProps.Clear();
+            if (!parser.Process(shaderFullPath, tempProps)) continue;
+            if (!tempProps.Any()) continue;
 
             var ns = symbol.ContainingNamespace;
             if (!ns.IsGlobalNamespace)
@@ -52,61 +62,98 @@ namespace {{ns}}
     {
         public global::UnityEngine.Material Target { get; set; }
 """);
-                foreach (var propBlock in shader.PropertiesBlocks)
+                foreach (var prop in tempProps)
                 {
-                    foreach (var prop in propBlock.PropertyDefinitions)
-                    {
-                        sourceBuilder.AppendLine($$"""
-        // - {{prop.Name}} {{prop.DisplayName}}
-""");
-
-                        PropertyProvider? provider = prop.Type switch
-                        {
-                            PropertyTypeSimpleNode { Type: "2d" } => TexturePropertyProvider.Instance,
-                            PropertyTypeSimpleNode { Type: "integer" or "int" } => SimplePropertyProvider.Integer,
-                            PropertyTypeSimpleNode { Type: "float" } or PropertyTypeRangeNode => SimplePropertyProvider
-                                .Float,
-                            PropertyTypeSimpleNode { Type: "color" } => SimplePropertyProvider.Color,
-                            PropertyTypeSimpleNode { Type: "vector" } => SimplePropertyProvider.Vector,
-                            _ => null
-                        };
-
-                        if (provider == null)
-                        {
-                            sourceBuilder.AppendLine($$"""
-        //   - skipped
-""");
-                            continue;
-                        }
-
-                        provider.Generate(context, sourceBuilder, prop);
-                    }
+                    prop.Provider.Generate(context, sourceBuilder, prop.Name);
                 }
-
+                
                 sourceBuilder.AppendLine($$"""
     }
 """);
-            }
 
 
-            if (!ns.IsGlobalNamespace)
-            {
-                sourceBuilder.AppendLine($$"""
+                if (!ns.IsGlobalNamespace)
+                {
+                    sourceBuilder.AppendLine($$"""
 }
 """);
+                }
             }
+        }
+    }
+
+    class ShaderlabParser : ShaderParser
+    {
+        private readonly Parser shaderlabParser;
+
+        public ShaderlabParser(Parser shaderlabParser)
+        {
+            this.shaderlabParser = shaderlabParser;
+        }
+
+        public override bool Match(string shaderFullPath)
+        {
+            return Path.GetExtension(shaderFullPath) == ".shader";
+        }
+
+        public override bool Process(string shaderFullPath, IList<ShaderProperty> result)
+        {
+            var shaderContent = File.ReadAllText(shaderFullPath, Encoding.UTF8);
+
+            var root = shaderlabParser.Parse(shaderContent).Root;
+            if (root.AstNode is not ShaderNode shader) return false;
+
+            foreach (var propBlock in shader.PropertiesBlocks)
+            {
+                foreach (var prop in propBlock.PropertyDefinitions)
+                {
+                    PropertyProvider? provider = prop.Type switch
+                    {
+                        PropertyTypeSimpleNode { Type: "2d" } => TexturePropertyProvider.Instance,
+                        PropertyTypeSimpleNode { Type: "integer" or "int" } => SimplePropertyProvider.Integer,
+                        PropertyTypeSimpleNode { Type: "float" } or PropertyTypeRangeNode => SimplePropertyProvider
+                            .Float,
+                        PropertyTypeSimpleNode { Type: "color" } => SimplePropertyProvider.Color,
+                        PropertyTypeSimpleNode { Type: "vector" } => SimplePropertyProvider.Vector,
+                        _ => null
+                    };
+
+                    if (provider == null) continue;
+
+                    result.Add(new ShaderProperty(provider, prop.Name));
+                }
+            }
+
+            return true;
         }
     }
 }
 
+public class ShaderProperty
+{
+    public PropertyProvider Provider { get; }
+    public string Name { get; }
+
+    public ShaderProperty(PropertyProvider provider, string name)
+    {
+        Provider = provider;
+        Name = name;
+    }
+}
+
+public abstract class ShaderParser
+{
+    public abstract bool Match(string shaderFullPath);
+    public abstract bool Process(string shaderFullPath, IList<ShaderProperty> result);
+}
+
 public abstract class PropertyProvider
 {
-    public abstract void Generate(UniTypedGeneratorContext context, StringBuilder sourceBuilder, PropertyNode prop);
+    public abstract void Generate(UniTypedGeneratorContext context, StringBuilder sourceBuilder, string propName);
 }
 
 public class SimplePropertyProvider : PropertyProvider
 {
-
     public static readonly SimplePropertyProvider Integer =
         new SimplePropertyProvider("int", "{0}.GetInt({1})", "{0}.SetInt({1}, {2})");
 
@@ -118,7 +165,7 @@ public class SimplePropertyProvider : PropertyProvider
 
     public static readonly SimplePropertyProvider Vector =
         new SimplePropertyProvider("global::UnityEngine.Vector4", "{0}.GetVector({1})", "{0}.SetVector({1}, {2})");
-
+    
     public string CSharpTypeSyntax { get; }
     public string GetterFormat { get; }
     public string SetterFormat { get; }
@@ -130,14 +177,14 @@ public class SimplePropertyProvider : PropertyProvider
         SetterFormat = setterFormat;
     }
 
-    public override void Generate(UniTypedGeneratorContext context, StringBuilder sourceBuilder, PropertyNode prop)
+    public override void Generate(UniTypedGeneratorContext context, StringBuilder sourceBuilder, string propName)
     {
-        var nameIdName = $"__unityped__name_{prop.Name}";
+        var nameIdName = $"__unityped__name_{propName}";
         var target = $"Target";
 
         sourceBuilder.AppendLine($$"""
-        private static readonly int {{nameIdName}} = global::UnityEngine.Shader.PropertyToID(@"{{prop.Name}}");
-        public {{CSharpTypeSyntax}} {{prop.Name}} 
+        private static readonly int {{nameIdName}} = global::UnityEngine.Shader.PropertyToID(@"{{propName}}");
+        public {{CSharpTypeSyntax}} {{propName}} 
         {
             get
             {
@@ -161,14 +208,14 @@ public class TexturePropertyProvider : PropertyProvider
     {
     }
 
-    public override void Generate(UniTypedGeneratorContext context, StringBuilder sourceBuilder, PropertyNode prop)
+    public override void Generate(UniTypedGeneratorContext context, StringBuilder sourceBuilder, string propName)
     {
-        var nameIdName = $"__unityped__name_{prop.Name}";
+        var nameIdName = $"__unityped__name_{propName}";
         var target = $"Target";
 
         sourceBuilder.AppendLine($$"""
-        private static readonly int {{nameIdName}} = global::UnityEngine.Shader.PropertyToID(@"{{prop.Name}}");
-        public global::UnityEngine.Texture {{prop.Name}} 
+        private static readonly int {{nameIdName}} = global::UnityEngine.Shader.PropertyToID(@"{{propName}}");
+        public global::UnityEngine.Texture {{propName}} 
         {
             get
             {
@@ -181,7 +228,7 @@ public class TexturePropertyProvider : PropertyProvider
             }
         }
 
-        public global::UnityEngine.Vector2 {{prop.Name}}_Offset
+        public global::UnityEngine.Vector2 {{propName}}_Offset
         {
             get
             {
@@ -194,7 +241,7 @@ public class TexturePropertyProvider : PropertyProvider
             }
         }
 
-        public global::UnityEngine.Vector2 {{prop.Name}}_Scale
+        public global::UnityEngine.Vector2 {{propName}}_Scale
         {
             get
             {
@@ -206,7 +253,7 @@ public class TexturePropertyProvider : PropertyProvider
                 {{target}}.SetTextureScale({{nameIdName}}, value);
             }
         }
-        public bool {{prop.Name}}_Exists
+        public bool {{propName}}_Exists
         {
             get
             {

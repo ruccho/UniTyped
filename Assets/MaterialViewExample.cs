@@ -7,7 +7,7 @@ public class MaterialViewExample : MonoBehaviour
 
     void Update()
     {
-        var view = new NewUnlitShaderView()
+        var view = new NewShaderGraphView()
         {
             Target = mat
         };
@@ -17,6 +17,14 @@ public class MaterialViewExample : MonoBehaviour
 
     }
 }
+
+[UniTypedMaterialView("New Shader Graph.shadergraph")]
+public partial struct NewShaderGraphView
+{
+    
+}
+
+
 
 [UniTypedMaterialView("NewUnlitShader.shader")]
 public partial struct NewUnlitShaderView

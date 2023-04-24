@@ -179,6 +179,14 @@ public partial struct NewUnlitShaderView
     
 }
 
+//ShaderGraphにも対応しています。
+/*
+[UniTypedMaterialView("New Shader Graph.shadergraph")]
+public partial struct NewShaderGraphView
+{
+}
+*/
+
 public class MaterialViewExample : MonoBehaviour
 {
     [SerializeField] private Material mat = default;

@@ -236,7 +236,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e8a7f13b65bc5b6428a351c86140b8e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  unlitMat: {fileID: 2100000, guid: 44f2cde00579ef54ab33c5d1453cd571, type: 2}
+  mat: {fileID: 2100000, guid: 59883f6578fe29c4a8d4fa45904572d9, type: 2}
 --- !u!4 &551249972
 Transform:
   m_ObjectHideFlags: 0
@@ -398,7 +398,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 44f2cde00579ef54ab33c5d1453cd571, type: 2}
+  - {fileID: 2100000, guid: 59883f6578fe29c4a8d4fa45904572d9, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
