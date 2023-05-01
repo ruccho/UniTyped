@@ -49,8 +49,15 @@ public class TypePath : IEquatable<TypePath>
         {
             for (int i = 0; i < spaces.Length - 1; i++)
             {
-                if (Parent == null) Parent = new TypePath(spaces[i]);
-                else Parent.Append(spaces[i]);
+                if (Parent == null)
+                {
+                    //root
+                    Parent = new TypePath(spaces[i]);
+                }
+                else
+                {
+                    Parent = Parent.Append(spaces[i]);
+                }
             }
         }
 

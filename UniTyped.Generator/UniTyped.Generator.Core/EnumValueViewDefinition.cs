@@ -9,6 +9,8 @@ public class EnumValueViewDefinition : GeneratedViewDefinition
 
     private ITypeSymbol EnumType { get; }
 
+    public override ITypeSymbol SourceType => EnumType;
+
 
     public EnumValueViewDefinition(ITypeSymbol enumType)
     {

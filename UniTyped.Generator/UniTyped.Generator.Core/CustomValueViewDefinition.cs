@@ -24,6 +24,8 @@ public class CustomValueViewDefinition : GeneratedViewDefinition
 
     public override bool IsDirectAccess => false;
 
+
+    public override ITypeSymbol SourceType => TemplateTypeSymbol;
     public ITypeSymbol TemplateTypeSymbol { get; }
     public bool IsUnityEngineObject { get; }
 
@@ -246,9 +248,6 @@ public class CustomValueViewDefinition : GeneratedViewDefinition
 
     public override string GetViewTypeSyntax(UniTypedGeneratorContext context, ITypeSymbol type)
     {
-        var templateType = TemplateTypeSymbol;
-        var fieldType = type as INamedTypeSymbol;
-
         return $"global::UniTyped.Generated.{Utils.GetFullQualifiedTypeName(context, type, true, "View")}";
     }
 

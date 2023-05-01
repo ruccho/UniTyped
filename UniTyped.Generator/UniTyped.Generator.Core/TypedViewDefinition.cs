@@ -38,6 +38,7 @@ public abstract class RuntimeViewDefinition : TypedViewDefinition
 
 public abstract class GeneratedViewDefinition : RuntimeViewDefinition
 {
+    public abstract ITypeSymbol SourceType { get; }
 
     public abstract TypePath GetFullTypePath(UniTypedGeneratorContext context);
     
