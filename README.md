@@ -209,6 +209,8 @@ Shader "Unlit/NewUnlitShader"
 Create `partial` struct with `UniTyped.UniTypedAnimatorView` attribute.
 Ensure that the latest aniamtor controller assets are saved to disk (with `Save Project`) .
 
+![image](https://user-images.githubusercontent.com/16096562/235991706-f8db8e2f-36c9-4ff7-9e67-73c03645f206.png)
+
 ```csharp
 using UnityEngine;
 using UniTyped;

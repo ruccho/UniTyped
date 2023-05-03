@@ -209,6 +209,8 @@ Shader "Unlit/NewUnlitShader"
 `UniTyped.UniTypedAnimatorView` 属性つきの `partial` なstructを作成します。
 最新のAnimator Controllerアセットが`Save Project`でディスクに保存されていることを確認してください。
 
+![image](https://user-images.githubusercontent.com/16096562/235991706-f8db8e2f-36c9-4ff7-9e67-73c03645f206.png)
+
 ```csharp
 using UnityEngine;
 using UniTyped;
