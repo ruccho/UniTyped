@@ -1,4 +1,4 @@
-﻿using UniTyped.Generator.TypedViews;
+﻿using UniTyped.Generator.SerializationViews;
 
 namespace UniTyped.Generator;
 

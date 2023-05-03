@@ -828,13 +828,22 @@
           }
         }
       },
+      "YamlDotNet/13.1.0": {
+        "runtime": {
+          "lib/netstandard2.0/YamlDotNet.dll": {
+            "assemblyVersion": "13.0.0.0",
+            "fileVersion": "13.1.0.0"
+          }
+        }
+      },
       "UniTyped.Generator.Core/1.0.0": {
         "dependencies": {
           "Irony": "1.2.0",
           "Irony.Interpreter": "1.2.0",
           "Microsoft.CodeAnalysis": "3.9.0",
           "Microsoft.CodeAnalysis.CSharp": "3.9.0",
-          "Newtonsoft.Json": "13.0.3"
+          "Newtonsoft.Json": "13.0.3",
+          "YamlDotNet": "13.1.0"
         },
         "runtime": {
           "UniTyped.Generator.Core.dll": {}
@@ -1211,6 +1220,13 @@
       "sha512": "sha512-zteT+G8xuGu6mS+mzDzYXbzS7rd3K6Fjb9RiZlYlJPam2/hU7JCBZBVEcywNuR+oZ1ncTvc/cq0faRr3P01OVg==",
       "path": "system.threading.tasks.extensions/4.5.4",
       "hashPath": "system.threading.tasks.extensions.4.5.4.nupkg.sha512"
+    },
+    "YamlDotNet/13.1.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-S4tzJjofMDx8PKtbnwkaMznbPD1aUffVKW+ClhfOGAYFIPuY9sSrArcFQOcRkbwRP1kYIaMbXk4Vsnfk3dE3dQ==",
+      "path": "yamldotnet/13.1.0",
+      "hashPath": "yamldotnet.13.1.0.nupkg.sha512"
     },
     "UniTyped.Generator.Core/1.0.0": {
       "type": "project",

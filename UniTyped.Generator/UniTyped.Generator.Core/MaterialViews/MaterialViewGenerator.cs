@@ -15,9 +15,7 @@ public static class MaterialViewGenerator
 
     public static void GenerateViews(UniTypedGeneratorContext context, StringBuilder sourceBuilder)
     {
-        sourceBuilder.AppendLine($"// UniTypedMaterialViewGenerator");
-
-        //return;
+        sourceBuilder.AppendLine($"// MaterialViewGenerator");
 
         var tempProps = new List<ShaderProperty>();
 
@@ -34,7 +32,7 @@ public static class MaterialViewGenerator
 
             var shaderPath = attr.ConstructorArguments[0].Value as string;
 
-            if (shaderPath == null) continue;
+            if (string.IsNullOrEmpty(shaderPath)) continue;
 
             var shaderFullPath = $"{Path.GetDirectoryName(materialViewType.SyntaxTree.FilePath)}/{shaderPath}";
 

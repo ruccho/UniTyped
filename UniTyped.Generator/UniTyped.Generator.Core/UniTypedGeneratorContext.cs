@@ -1,5 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
-using UniTyped.Generator.TypedViews;
+using UniTyped.Generator.SerializationViews;
 
 namespace UniTyped.Generator;
 
@@ -27,6 +27,7 @@ public class UniTypedGeneratorContext
     public INamedTypeSymbol Vector4 { get; }
     public INamedTypeSymbol UniTypedFieldAttribute { get; }
     public INamedTypeSymbol UniTypedMaterialViewAttribute { get; }
+    public INamedTypeSymbol UniTypedAnimatorViewAttribute { get; }
 
     private readonly BuiltinViewDefinition[] builtinSerializeFieldViews;
 
@@ -142,6 +143,7 @@ public class UniTypedGeneratorContext
 
         UniTypedFieldAttribute = GetSymbol("UniTyped.UniTypedFieldAttribute");
         UniTypedMaterialViewAttribute = GetSymbol("UniTyped.UniTypedMaterialViewAttribute");
+        UniTypedAnimatorViewAttribute = GetSymbol("UniTyped.UniTypedAnimatorViewAttribute");
 
         builtinSerializeFieldViews = new BuiltinViewDefinition[]
         {

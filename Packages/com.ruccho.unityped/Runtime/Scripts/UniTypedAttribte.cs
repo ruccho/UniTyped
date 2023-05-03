@@ -30,4 +30,14 @@ namespace UniTyped
             this.ShaderPath = shaderPath;
         }
     }
+
+    [AttributeUsage(AttributeTargets.Struct, Inherited = false, AllowMultiple = false)]
+    public class UniTypedAnimatorViewAttribute : System.Attribute
+    {
+        public string ControllerPath { get; }
+        public UniTypedAnimatorViewAttribute(string controllerPath)
+        {
+            this.ControllerPath = controllerPath;
+        }
+    }
 }

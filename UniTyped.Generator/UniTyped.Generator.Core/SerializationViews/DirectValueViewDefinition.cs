@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 
-namespace UniTyped.Generator.TypedViews;
+namespace UniTyped.Generator.SerializationViews;
 
 public
     class DirectValueViewDefinition : BuiltinViewDefinition

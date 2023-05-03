@@ -6,4 +6,5 @@ public interface IUniTypedCollector
 {
     public HashSet<TypeDeclarationSyntax> UniTypedTypes { get; } 
     public HashSet<TypeDeclarationSyntax> MaterialViews { get; }
+    public HashSet<TypeDeclarationSyntax> AnimatorViews { get; }
 }

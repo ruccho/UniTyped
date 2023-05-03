@@ -1,7 +1,8 @@
 ﻿using Microsoft.CodeAnalysis;
 using System.Text;
+using UniTyped.Generator.AnimatorViews;
 using UniTyped.Generator.MaterialViews;
-using UniTyped.Generator.TypedViews;
+using UniTyped.Generator.SerializationViews;
 
 namespace UniTyped.Generator
 {
@@ -30,6 +31,8 @@ namespace UniTyped.Generator
                 sourceBuilder.AppendLine("#endif");
                 
                 MaterialViewGenerator.GenerateViews(context, sourceBuilder);
+                
+                AnimatorViewGenerator.GenerateViews(context, sourceBuilder);
             }
             catch (Exception e)
             {

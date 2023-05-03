@@ -63,25 +63,36 @@ class UniTypedCollector : CSharpSyntaxWalker, IUniTypedCollector
 {
     public HashSet<TypeDeclarationSyntax> UniTypedTypes { get; } = new();
     public HashSet<TypeDeclarationSyntax> MaterialViews { get; } = new();
+    public HashSet<TypeDeclarationSyntax> AnimatorViews { get; } = new();
 
     private void VisitTypeDeclaration(TypeDeclarationSyntax node)
     {
         if (node.AttributeLists.Count > 0)
         {
             var attributes = node.AttributeLists.SelectMany(x => x.Attributes);
-            if (attributes.Any(x => x.Name.ToString() is "UniTyped" or "UniTyped.UniTyped" or "UniTypedAttribute"
-                    or "UniTyped.UniTypedAttribute"))
+            if (attributes.Any(x => MatchesAttributeName(x.Name.ToString(), "UniTyped", "UniTyped")))
             {
                 UniTypedTypes.Add(node);
             }
 
-            if (attributes.Any(x => x.Name.ToString() is "UniTypedMaterialView"
-                    or "UniTypedMaterialViewAttribute" or "UniTyped.UniTypedMaterialView"
-                    or "UniTyped.UniTypedMaterialViewAttribute"))
+            if (attributes.Any(x => MatchesAttributeName(x.Name.ToString(), "UniTyped", "UniTypedMaterialView")))
             {
                 MaterialViews.Add(node);
             }
+
+            if (attributes.Any(x => MatchesAttributeName(x.Name.ToString(), "UniTyped", "UniTypedAnimatorView")))
+            {
+                AnimatorViews.Add(node);
+            }
         }
+    }
+    
+    private static bool MatchesAttributeName(string name, string @namespace, string shortAttributeName)
+    {
+        return name == shortAttributeName ||
+               name == $"{shortAttributeName}Attribute" ||
+               name == $"{@namespace}.{shortAttributeName}" ||
+               name == $"{@namespace}.{shortAttributeName}Attribute";
     }
 
     public override void VisitClassDeclaration(ClassDeclarationSyntax node)
