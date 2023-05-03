@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using UniTyped.Generator.TypedViews;
 
 namespace UniTyped.Generator;
 

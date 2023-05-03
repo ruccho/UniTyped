@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 
 namespace UniTyped.Generator.MaterialViews;
 
-public static class UniTypedMaterialViewGenerator
+public static class MaterialViewGenerator
 {
     private static readonly ShaderParser[] parsers = new ShaderParser[]
     {

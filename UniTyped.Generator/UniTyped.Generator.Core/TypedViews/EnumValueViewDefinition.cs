@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using Microsoft.CodeAnalysis;
 
-namespace UniTyped.Generator;
+namespace UniTyped.Generator.TypedViews;
 
 public class EnumValueViewDefinition : GeneratedViewDefinition
 {

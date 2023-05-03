@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 
-namespace UniTyped.Generator;
+namespace UniTyped.Generator.TypedViews;
 
 public class TypeParameterViewDefinition : BuiltinViewDefinition
 {

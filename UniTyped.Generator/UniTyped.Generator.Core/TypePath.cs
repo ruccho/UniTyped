@@ -2,6 +2,9 @@
 
 namespace UniTyped.Generator;
 
+/// <summary>
+/// Represents path of a type in namespaces and parent types.
+/// </summary>
 public class TypePath : IEquatable<TypePath>
 {
     public TypePath? Parent { get; set; }
