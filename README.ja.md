@@ -52,21 +52,7 @@ public class ExampleEditor : UnityEditor.Editor
 #endif
 ```
 
-### サポートされている型
-
-参考: https://docs.unity3d.com/Manual/script-Serialization.html
-
- - C#のプリミティブ型 (`byte`, `sbyte`, `short`, `ushort`, `int`, `uint`, `long`, `ulong`, `float`, `double`, `bool`, `string`, `char`)
- - Unityのビルトイン型 (`AnimationCurve`, `BoundsInt`, `Bounds`, `Color`, `Hash128`, `Quaternion`, `RectInt`, `Rect`, `Vector2Int`, `Vector2`, `Vector3Int`, `Vector3`, `Vector4`)
- - Enum (32ビット以下)
- - `UnityEngine.Object` 派生型への参照
- - `[Serializable]`つきのカスタムクラス・構造体
- - 要素の型がシリアライズ可能な Array / List<T>
- - 固定サイズバッファ
- - `[SerializeReference]` つきの Array / List<T>
-
-
-### Array / List operation
+### 配列・リストの操作
 
 ```csharp
 using System;
@@ -164,9 +150,9 @@ public class ExampleEditor : UnityEditor.Editor
 #endif
 ```
 
-## UnityEngine.Materialの型付きビュー
+## Materialの型付きビュー
 
-`UniTypedMaterialView` 属性つきの `partial` なstructを作成します。
+`UniTyped.UniTypedMaterialView` 属性つきの `partial` なstructを作成します。
 
 ```csharp
 using UnityEngine;
@@ -215,6 +201,52 @@ Shader "Unlit/NewUnlitShader"
     }
 
     //...
+}
+```
+
+## Animatorパラメータへの型付きビュー
+
+`UniTyped.UniTypedAnimatorView` 属性つきの `partial` なstructを作成します。
+最新のAnimator Controllerアセットが`Save Project`でディスクに保存されていることを確認してください。
+
+```csharp
+using UnityEngine;
+using UniTyped;
+
+[UniTypedAnimatorView("New Animator Controller.controller")]
+public partial struct NewAnimatorControllerView
+{
+    
+}
+
+public class AnimatorViewExample : MonoBehaviour
+{
+
+    private Animator animator;
+    
+    void Update()
+    {
+        if (!animator && !TryGetComponent(out animator)) return;
+        
+        var view = new NewAnimatorControllerView()
+        {
+            Target = animator
+        };
+
+        // Float
+        view.FloatParameter = Time.time;
+        view.SetFloatParameter(Time.time, dampTime, deltaTime);
+        
+        // Int
+        view.IntParameter = Time.frameCount;
+        
+        // Bool
+        view.BoolParameter = true;
+        
+        // Trigger
+        view.TriggerA();
+        view.ResetTriggerA();
+    }
 }
 ```
 

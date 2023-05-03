@@ -15,7 +15,7 @@ UniTyped is a source generator for Unity that provides strongly typed access to 
 ## Installation
 Add git URL `https://github.com/ruccho/UniTyped.git?path=/Packages/com.ruccho.unityped` from UPM.
 
-## Typed View for Serialized Objects
+## Typed Views for Serialized Objects
 Put `[UniTyped.UniTyped]` attribute on your MonoBehaviour, ScriptableObject or your custom serializable class / struct then you can use `UniTyped.Generated.[YourNamespace].[YourClass]View` struct in your editor code.
 
 ```csharp
@@ -52,19 +52,6 @@ public class ExampleEditor : UnityEditor.Editor
 
 #endif
 ```
-
-### Supported Types
-
-See also: https://docs.unity3d.com/Manual/script-Serialization.html
-
- - Primitive C# types (`byte`, `sbyte`, `short`, `ushort`, `int`, `uint`, `long`, `ulong`, `float`, `double`, `bool`, `string`, `char`)
- - Built-in Unity Types (`AnimationCurve`, `BoundsInt`, `Bounds`, `Color`, `Hash128`, `Quaternion`, `RectInt`, `Rect`, `Vector2Int`, `Vector2`, `Vector3Int`, `Vector3`, `Vector4`)
- - Enum types (32 bites or smaller)
- - References to objects that derive from `UnityEngine.Object`
- - Custom classes / structs with `[Serializable]`
- - Array / List<T> with serializable element type
- - Fixed-size buffers
- - `[SerializeReference]` values / arrays / lists
 
 
 ### Array / List operation
@@ -164,9 +151,9 @@ public class ExampleEditor : UnityEditor.Editor
 #endif
 ```
 
-## Typed View for UnityEngine.Material
+## Typed Views for Material
 
-Create `partial` struct with `UniTypedMaterialView` attribute.
+Create `partial` struct with `UniTyped.UniTypedMaterialView` attribute.
 
 ```csharp
 using UnityEngine;
@@ -214,6 +201,52 @@ Shader "Unlit/NewUnlitShader"
     }
 
     //...
+}
+```
+
+## Typed Views for Animator Parameters
+
+Create `partial` struct with `UniTyped.UniTypedAnimatorView` attribute.
+Ensure that the latest aniamtor controller assets are saved to disk (with `Save Project`) .
+
+```csharp
+using UnityEngine;
+using UniTyped;
+
+[UniTypedAnimatorView("New Animator Controller.controller")]
+public partial struct NewAnimatorControllerView
+{
+    
+}
+
+public class AnimatorViewExample : MonoBehaviour
+{
+
+    private Animator animator;
+    
+    void Update()
+    {
+        if (!animator && !TryGetComponent(out animator)) return;
+        
+        var view = new NewAnimatorControllerView()
+        {
+            Target = animator
+        };
+
+        // Float
+        view.FloatParameter = Time.time;
+        view.SetFloatParameter(Time.time, dampTime, deltaTime);
+        
+        // Int
+        view.IntParameter = Time.frameCount;
+        
+        // Bool
+        view.BoolParameter = true;
+        
+        // Trigger
+        view.TriggerA();
+        view.ResetTriggerA();
+    }
 }
 ```
 
