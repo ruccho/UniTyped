@@ -28,6 +28,8 @@ public class UniTypedGeneratorContext
     public INamedTypeSymbol UniTypedFieldAttribute { get; }
     public INamedTypeSymbol UniTypedMaterialViewAttribute { get; }
     public INamedTypeSymbol UniTypedAnimatorViewAttribute { get; }
+    public INamedTypeSymbol UniTypedProjectAnchor { get; }
+
 
     private readonly BuiltinViewDefinition[] builtinSerializeFieldViews;
 
@@ -144,6 +146,7 @@ public class UniTypedGeneratorContext
         UniTypedFieldAttribute = GetSymbol("UniTyped.UniTypedFieldAttribute");
         UniTypedMaterialViewAttribute = GetSymbol("UniTyped.UniTypedMaterialViewAttribute");
         UniTypedAnimatorViewAttribute = GetSymbol("UniTyped.UniTypedAnimatorViewAttribute");
+        UniTypedProjectAnchor = GetSymbol("UniTyped.ProjectAnchor");
 
         builtinSerializeFieldViews = new BuiltinViewDefinition[]
         {
