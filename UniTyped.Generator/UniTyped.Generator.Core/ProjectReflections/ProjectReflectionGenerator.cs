@@ -7,101 +7,189 @@ public static class ProjectReflectionGenerator
 {
     public static void GenerateViews(UniTypedGeneratorContext context, StringBuilder sourceBuilder)
     {
-        var projectPath = GetProjectPathFromAnchor(context);
-        var projectSettingsPath = Path.Combine(projectPath, "ProjectSettings");
-
         sourceBuilder.AppendLine($$"""
 namespace UniTyped.Reflection
 {
 """);
 
-        // tags and layers
-        var tagManagerPath = Path.Combine(projectSettingsPath, "TagManager.asset");
+        List<string> tags = new();
+        List<(int index, string name)> layers = new();
+        List<(int id, string name)> sortingLayers = new();
 
-        using var tagManagerContent = new StreamReader(tagManagerPath, Encoding.UTF8);
-        var tagManagerYaml = new YamlStream();
-        tagManagerYaml.Load(tagManagerContent);
-
-        List<string> tags = new ();
-        List<(int index, string name)> layers = new ();
-
-        foreach (var doc in tagManagerYaml.Documents)
+        try
         {
-            var root = (YamlMappingNode)doc.RootNode;
+            var projectPath = GetProjectPathFromAnchor(context);
+            var projectSettingsPath = Path.Combine(projectPath, "ProjectSettings");
 
-            if (!root.Children.TryGetValue("TagManager", out var tagManagerNode)) continue;
-            if (tagManagerNode is not YamlMappingNode tagManagerNodeTyped) continue;
+            // tags and layers
+            var tagManagerPath = Path.Combine(projectSettingsPath, "TagManager.asset");
 
-            if (tagManagerNodeTyped.Children.TryGetValue("tags", out var tagsNode) &&
-                tagsNode is YamlSequenceNode tagsNodeTyped)
+            using var tagManagerContent = new StreamReader(tagManagerPath, Encoding.UTF8);
+            var tagManagerYaml = new YamlStream();
+            tagManagerYaml.Load(tagManagerContent);
+
+            foreach (var doc in tagManagerYaml.Documents)
             {
-                tags.AddRange(tagsNodeTyped.OfType<YamlScalarNode>().Select(t => t.Value).Where(t => t != null));
-            }
-            
-            if (tagManagerNodeTyped.Children.TryGetValue("layers", out var layersNode) &&
-                layersNode is YamlSequenceNode layersNodeTyped)
-            {
-                int i = 0;
-                foreach (var layerNode in layersNodeTyped)
+                var root = (YamlMappingNode)doc.RootNode;
+
+                if (!root.Children.TryGetValue("TagManager", out var tagManagerNode)) continue;
+                if (tagManagerNode is not YamlMappingNode tagManagerNodeTyped) continue;
+
+                if (tagManagerNodeTyped.Children.TryGetValue("tags", out var tagsNode) &&
+                    tagsNode is YamlSequenceNode tagsNodeTyped)
                 {
-                    try
+                    tags.AddRange(tagsNodeTyped.OfType<YamlScalarNode>().Select(t => t.Value).Where(t => t != null));
+                }
+
+                if (tagManagerNodeTyped.Children.TryGetValue("layers", out var layersNode) &&
+                    layersNode is YamlSequenceNode layersNodeTyped)
+                {
+                    int i = 0;
+                    foreach (var layerNode in layersNodeTyped)
                     {
-                        if (layerNode is not YamlScalarNode layerNodeTyped) continue;
-                        if (string.IsNullOrEmpty(layerNodeTyped.Value)) continue;
-                        
-                        layers.Add((i, layerNodeTyped.Value));
+                        try
+                        {
+                            if (layerNode is not YamlScalarNode layerNodeTyped) continue;
+                            if (string.IsNullOrEmpty(layerNodeTyped.Value)) continue;
+
+                            layers.Add((i, layerNodeTyped.Value));
+                        }
+                        finally
+                        {
+                            i++;
+                        }
                     }
-                    finally
+                }
+                
+                if (tagManagerNodeTyped.Children.TryGetValue("m_SortingLayers", out var sortingLayersNode) &&
+                    sortingLayersNode is YamlSequenceNode sortingLayersNodeTyped)
+                {
+                    foreach (var sortingLayerNode in sortingLayersNodeTyped)
                     {
-                        i++;
+                        if (sortingLayerNode is not YamlMappingNode sortingLayerNodeTyped) continue;
+
+                        if (!sortingLayerNodeTyped.Children.TryGetValue("name", out var nameNode) ||
+                            nameNode is not YamlScalarNode nameNodeTyped) continue;
+                        if (!sortingLayerNodeTyped.Children.TryGetValue("uniqueID", out var idNode) ||
+                            idNode is not YamlScalarNode idNodeTyped) continue;
+
+                        if (string.IsNullOrEmpty(nameNodeTyped.Value)) continue;
+                        if (string.IsNullOrEmpty(idNodeTyped.Value)) continue;
+                        if (!int.TryParse(idNodeTyped.Value, out int id)) continue;
+
+                        sortingLayers.Add((id, nameNodeTyped.Value));
                     }
                 }
             }
-
         }
-
-        // tags
+        finally
         {
-
-            sourceBuilder.AppendLine($$"""
+            // tags
+            {
+                sourceBuilder.AppendLine($$"""
     public enum Tags
     {
 """);
 
-            foreach (var tag in tags)
-            {
-                string identifierName = Utils.ToIdentifierCompatible(tag);
+                for (var i = 0; i < tags.Count; i++)
+                {
+                    var tag = tags[i];
+                    string identifierName = Utils.ToIdentifierCompatible(tag);
+                    sourceBuilder.AppendLine($$"""
+        /// <summary>
+        /// {{tag}}
+        /// </summary>
+        @{{identifierName}} = {{i.ToString()}},
+
+""");
+                }
+
                 sourceBuilder.AppendLine($$"""
-        @{{identifierName}}, // {{tag}}
+    } // enum Tags
+
 """);
             }
 
-            sourceBuilder.AppendLine($$"""
-    } // enum Tags
+            // tag data
+            {
+                sourceBuilder.AppendLine($$"""
+    internal static class TagData
+    {
+        public static readonly string[] tagNames =
+        {
 """);
-        }
 
-        // layers
-        
-        sourceBuilder.AppendLine($$"""
+                for (var i = 0; i < tags.Count; i++)
+                {
+                    var tag = tags[i];
+                    string literalName = Utils.ToCSharpEscapedVerbatimLiteral(tag);
+                    sourceBuilder.AppendLine($$"""
+            @"{{literalName}}",
+""");
+                }
+
+                sourceBuilder.AppendLine($$"""
+        };
+    } // class TagData
+
+""");
+            }
+
+            // layers
+            {
+                sourceBuilder.AppendLine($$"""
     public enum Layers
     {
 """);
 
-        foreach (var layer in layers)
-        {
-            string identifierName = Utils.ToIdentifierCompatible(layer.name);
-            sourceBuilder.AppendLine($$"""
-        @{{identifierName}} = {{layer.index.ToString()}}, // {{layer.name}}
+                foreach (var layer in layers)
+                {
+                    string identifierName = Utils.ToIdentifierCompatible(layer.name);
+                    sourceBuilder.AppendLine($$"""
+        /// <summary>
+        /// {{layer.name}}
+        /// </summary>
+        @{{identifierName}} = {{layer.index.ToString()}},
+
 """);
-        }
-        sourceBuilder.AppendLine($$"""
+                }
+
+                sourceBuilder.AppendLine($$"""
     } // enum Layers
+
+""");
+            }
+
+            // sorting layers
+            {
+                sourceBuilder.AppendLine($$"""
+    public enum SortingLayers
+    {
 """);
 
-        sourceBuilder.AppendLine($$"""
-} //namespace UniTyped.Reflection
+                foreach (var sortingLayer in sortingLayers)
+                {
+                    string identifierName = Utils.ToIdentifierCompatible(sortingLayer.name);
+                    sourceBuilder.AppendLine($$"""
+        /// <summary>
+        /// {{sortingLayer.name}}
+        /// </summary>
+        @{{identifierName}} = {{sortingLayer.id.ToString()}},
+
 """);
+                }
+
+                sourceBuilder.AppendLine($$"""
+    } // enum SortingLayers
+
+""");
+            }
+
+            sourceBuilder.AppendLine($$"""
+} //namespace UniTyped.Reflection
+
+""");
+        }
     }
 
     private static string GetProjectPathFromAnchor(UniTypedGeneratorContext context)
