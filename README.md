@@ -2,20 +2,40 @@
 
 [日本語版](README.ja.md)
 
-UniTyped is a source generator for Unity that provides strongly typed access to serialized data through SerializedObject / SerializedProperty / Material.　It helps you write more concise and safe editor extension code.
+UniTyped is a source generator that allows typed access to data such as SerializedObjects, material parameters, tags and layers. It helps you write more concise and safe code.
 
-- **Statically Typed**: You don't have to write tons of `FindProperty` or touch the confusing SerializedProperty APIs.
-- **Less Heap Allocations**:  Generated code is struct-based and designed to avoid boxing; It is suitable for repeated invocations from OnInspectorGUI() and other editor codes, making your editor experience better.
+- **Statically Typed**: Eliminates string-based unstable data accesses and allows accesses to non-existent data to be discovered at the compile stage. There is no need to write a large number of `FindProperty`s or deal with the complicated API of SerializedProperty.
+- **Less Heap Allocations**:  Generated code is struct-based and designed to avoid boxing.
 
+# Table of Contents
 
-## Requirements
+ - [Requirements](#requirements)
+ - [Installation](#installation)
+ - [Limitations](#limitations)
+ - [Features](#features)
+    - [Typed View Generation](#typed-view-generation)
+        - [Serialized Objects](#serialized-objects)
+        - [Materials](#materials)
+        - [Animator Parameters](#animator-parameters)
+    - [Tags and Layers Enums](#tags-and-layers-enums)
+ - [Manual Generator](#manual-generator)
+
+# Requirements
  - Fully supported in Unity 2021.2 and later
  - In Unity 2021.1 and below, UniTyped features can be used with [Manual Generator](#manual-generator)
 
-## Installation
+# Installation
 Add git URL `https://github.com/ruccho/UniTyped.git?path=/Packages/com.ruccho.unityped` from UPM.
+ 
+# Limitations
+ - This project is currently experimental and breaking changes may be made.
+ - It may not cover all use cases. Please let me know by issues if you notice anything.
 
-## Typed Views for Serialized Objects
+# Features
+
+## Typed View Generation
+
+### Serialized Objects
 Put `[UniTyped.UniTyped]` attribute on your MonoBehaviour, ScriptableObject or your custom serializable class / struct then you can use `UniTyped.Generated.[YourNamespace].[YourClass]View` struct in your editor code.
 
 ```csharp
@@ -54,7 +74,7 @@ public class ExampleEditor : UnityEditor.Editor
 ```
 
 
-### Array / List operation
+#### Array / List operation
 
 ```csharp
 using System;
@@ -103,7 +123,7 @@ public class ExampleEditor : UnityEditor.Editor
 #endif
 ```
 
-### Configure Code Generation
+#### Configure Code Generation
 Use `[UniTypedField]` attribute to control the result of code generation.
 
  - `ignore`: ignores the field.
@@ -151,7 +171,7 @@ public class ExampleEditor : UnityEditor.Editor
 #endif
 ```
 
-## Typed Views for Material
+### Materials
 
 Create `partial` struct with `UniTyped.UniTypedMaterialView` attribute.
 
@@ -204,7 +224,7 @@ Shader "Unlit/NewUnlitShader"
 }
 ```
 
-## Typed Views for Animator Parameters
+### Animator Parameters
 
 Create `partial` struct with `UniTyped.UniTypedAnimatorView` attribute.
 Ensure that the latest aniamtor controller assets are saved to disk (with `Save Project`) .
@@ -250,25 +270,68 @@ public class AnimatorViewExample : MonoBehaviour
 }
 ```
 
-## Limitations
- - This project is currently experimental and breaking changes may be made.
- - It may not cover all use cases. Please let me know by issues if you notice anything.
+## Tags and Layers Enums
+
+In `UniTyped.Reflection` namespace, `Tags`, `Layers` and `SortingLayers` enums are automatically defined.
+
+You have to recompile `UniTyped` assembly after you make changes in tags and layers in project settings because these members are generated within `UniTyped` assembly. To recompile it, use `Assets` > `UniTyped` > `Apply Tags and Layers Reflection` option in menu bar.
+
+```csharp
+using System.Collections.ObjectModel;
+using UnityEngine;
+using UniTyped.Reflection;
+
+public class TagsAndLayersExample : MonoBehaviour
+{
+    private void Start()
+    {
+        // ---Tags---
+        
+        Debug.Log(Tags.New_tag);
+        
+        // tag names can be queried with UniTyped.Reflection.TagUtility
+        Debug.Log(TagUtility.GetTagName(Tags.New_tag)); // "New tag"
+        TagUtility.TryGetTagValue("New tag", out Tags result); // result: Tags.New_tag
+        ReadOnlyCollection<string> tagNames = TagUtility.TagNames; // enumerate tag names
+        
+        
+        // ---Layers---
+        
+        Debug.Log(Layers.Default);
+        Debug.Log(Layers.UI);
+        Debug.Log(Layers.Water);
+        Debug.Log(Layers.Ignore_Raycast);
+        Debug.Log(Layers.TransparentFX);
+        
+        // layer enum values can be used as layer indices.
+        Debug.Log(LayerMask.LayerToName((int)Layers.Default));
+        
+        
+        // ---Sorting Layers---
+        
+        Debug.Log(SortingLayers.Default);
+        
+        // sorting layer enum values can be used as sorting layer IDs.
+        SortingLayer.GetLayerValueFromID((int)SortingLayers.Default);
+    }
+}
+```
 
 
-## Manual Generator
+# Manual Generator
 By default, UniType uses the functionality of the Roslyn source generator available in Unity 2021.2 and later. In Unity 2021.1 and below, you can use UniType with manual generator provided as individual package.
 
-### Requirements
+## Requirements
 
  - .NET runtime (supports `netcoreapp3.1` target)
     - ensure `dotnet` cli tool is available
  - MSBuild (included in Visual Studio or .NET SDK)
 
-### Installation
+## Installation
 
 Add git URL `https://github.com/ruccho/UniTyped.git?path=/Packages/com.ruccho.unityped.manualgenerator` from Package Manager.
 
-### Usage
+## Usage
 
 1. Create generator profile asset from `Create` > `UniTyped` > `Manual Generator Profile` in project view.
 2. Add generator item.
@@ -278,5 +341,5 @@ Add git URL `https://github.com/ruccho/UniTyped.git?path=/Packages/com.ruccho.un
 
 ![image](https://user-images.githubusercontent.com/16096562/220120237-1fb1afa2-cd56-4b4f-80c6-aa1b3269a24e.png)
 
-### Hint
+## Hint
  - Executable of manual generator `UniTyped.Generator.Standalone.exe` can be found in `Packages/com.ruccho.unityped.manualgenerator/Editor/Executable~/netcoreapp3.1`. You can use it from commandline with options `--project=<CSPROJ PATH> --output=<OUTPUT SCRIPT PATH>`.
