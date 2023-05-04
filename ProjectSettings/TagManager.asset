@@ -3,7 +3,9 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - New tag
+  - New tag (1)
   layers:
   - Default
   - TransparentFX
@@ -38,6 +40,27 @@ TagManager:
   - 
   - 
   m_SortingLayers:
+  - name: AreaBack
+    uniqueID: 1809478785
+    locked: 0
+  - name: EffectBack
+    uniqueID: 975963247
+    locked: 0
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Entity
+    uniqueID: 1833916075
+    locked: 0
+  - name: EntityFront
+    uniqueID: 2368165811
+    locked: 0
+  - name: AreaFront
+    uniqueID: 3463280403
+    locked: 0
+  - name: EffectFront
+    uniqueID: 2639282975
+    locked: 0
+  - name: TopMost
+    uniqueID: 3038819161
     locked: 0

@@ -23,7 +23,7 @@ public class AnimatorViewExample : MonoBehaviour
 
         // Float
         view.FloatParameter = Time.time;
-        view.SetFloatParameter(Time.time, dampTime, deltaTime);
+        view.SetFloatParameter(Time.time, 0f, 0f);
         
         // Int
         view.IntParameter = Time.frameCount;
