@@ -75,9 +75,9 @@ namespace UniTyped.Reflection
 
                         if (string.IsNullOrEmpty(nameNodeTyped.Value)) continue;
                         if (string.IsNullOrEmpty(idNodeTyped.Value)) continue;
-                        if (!int.TryParse(idNodeTyped.Value, out int id)) continue;
+                        if (!uint.TryParse(idNodeTyped.Value, out uint id)) continue;
 
-                        sortingLayers.Add((id, nameNodeTyped.Value));
+                        sortingLayers.Add((unchecked((int)id), nameNodeTyped.Value));
                     }
                 }
             }
