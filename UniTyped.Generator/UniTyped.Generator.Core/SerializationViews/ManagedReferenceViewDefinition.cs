@@ -24,6 +24,6 @@ public class ManagedReferenceViewDefinition : RuntimeViewDefinition
 
     public override string GetViewTypeSyntax(UniTypedGeneratorContext context, ITypeSymbol type)
     {
-        return $"global::UniTyped.Editor.SerializedPropertyViewManagedReference<{Utils.GetFullQualifiedTypeName(context, type, false)}>";
+        return $"global::UniTyped.Editor.SerializedPropertyViewManagedReference<global::{Utils.GetFullQualifiedTypeName(context, type, false)}>";
     }
 }

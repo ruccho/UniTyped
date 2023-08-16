@@ -24,6 +24,6 @@ public class UnityEngineObjectReferenceValueViewDefinition : RuntimeViewDefiniti
 
     public override string GetViewTypeSyntax(UniTypedGeneratorContext context, ITypeSymbol type)
     {
-        return $"global::UniTyped.Editor.SerializedPropertyViewObjectReference<{Utils.GetFullQualifiedTypeName(context, type, false)}>";
+        return $"global::UniTyped.Editor.SerializedPropertyViewObjectReference<global::{Utils.GetFullQualifiedTypeName(context, type, false)}>";
     }
 }
