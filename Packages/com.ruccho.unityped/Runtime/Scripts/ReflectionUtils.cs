@@ -3,13 +3,17 @@ using System.Collections.ObjectModel;
 
 namespace UniTyped.Reflection
 {
-
     public static class TagUtility
     {
         private static ReadOnlyCollection<string> tagNames;
         public static ReadOnlyCollection<string> TagNames => tagNames ??= Array.AsReadOnly(TagData.tagNames);
 
         public static string GetTagName(Tags tag)
+        {
+            return TagData.tagNames[(int)tag];
+        }
+        
+        public static string ToTagName(this Tags tag)
         {
             return TagData.tagNames[(int)tag];
         }
