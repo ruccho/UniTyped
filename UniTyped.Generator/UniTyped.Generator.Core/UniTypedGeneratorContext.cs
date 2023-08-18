@@ -8,7 +8,6 @@ public class UniTypedGeneratorContext
     public IUniTypedCollector Collector { get; }
     public Compilation Compilation { get; }
     public INamedTypeSymbol List { get; }
-    public INamedTypeSymbol Serializable { get; }
     public INamedTypeSymbol SerializeField { get; }
     public INamedTypeSymbol SerializeReference { get; }
     public INamedTypeSymbol UnityEngineObject { get; }
@@ -125,7 +124,6 @@ public class UniTypedGeneratorContext
             throw new NullReferenceException($"Symbol not found: {metadataName}");
 
         List = GetSymbol("System.Collections.Generic.List`1");
-        Serializable = GetSymbol("System.SerializableAttribute");
         SerializeField = GetSymbol("UnityEngine.SerializeField");
         SerializeReference = GetSymbol("UnityEngine.SerializeReference");
         UnityEngineObject = GetSymbol("UnityEngine.Object");

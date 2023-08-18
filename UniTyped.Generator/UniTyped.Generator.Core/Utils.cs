@@ -78,11 +78,11 @@ internal static class Utils
         return false;
     }
 
-    public static bool IsCustomSerializable(UniTypedGeneratorContext context, ITypeSymbol symbol)
+    public static bool IsCustomSerializable(ITypeSymbol symbol)
     {
         if (symbol.TypeKind is not TypeKind.Class and not TypeKind.Struct) return false;
-        return symbol.GetAttributes().Any(a =>
-            SymbolEqualityComparer.Default.Equals(a.AttributeClass, context.Serializable));
+
+        return symbol is INamedTypeSymbol { IsSerializable: true };
     }
 
     public static string ExtractTypeArguments(UniTypedGeneratorContext context, ITypeSymbol type,
@@ -237,7 +237,7 @@ internal static class Utils
         if (IsSerializableEnumType(symbol)) return true;
         if (IsUnityBuiltinType(context, symbol)) return true;
         if (IsDerivedFrom(symbol, context.UnityEngineObject)) return true;
-        if (IsCustomSerializable(context, symbol)) return true;
+        if (IsCustomSerializable(symbol)) return true;
         if (IsSerializableArrayOrList(context, symbol, out _)) return true;
 
         return false;

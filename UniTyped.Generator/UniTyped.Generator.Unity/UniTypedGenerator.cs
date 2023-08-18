@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Reflection;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using System.Text;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -66,13 +67,25 @@ namespace UniTyped.Generator.Unity
         {
             if (roslynContext.SyntaxContextReceiver is not SyntaxContextReceiver receiver)
                 throw new InvalidOperationException();
-
+            
             string? result = Generator.UniTypedGenerator.Execute(roslynContext.Compilation, receiver);
 
             if (result != null)
             {
                 roslynContext.AddSource($"{roslynContext.Compilation.AssemblyName}.g.cs",
                     SourceText.From(result.ToString(), Encoding.UTF8));
+                
+                /*
+                Assembly myAssembly = Assembly.GetEntryAssembly();
+                var assemblyName = Path.GetFileNameWithoutExtension(myAssembly.Location);
+
+                var outPath = Path.Combine(Path.GetTempPath(), "UniTyped",
+                    $"{DateTime.Now.ToString("yyyyMMdd_HHmmss")}.{assemblyName}.{roslynContext.Compilation.AssemblyName}.g.cs");
+
+                Directory.CreateDirectory(Path.GetDirectoryName(outPath));
+                
+                File.WriteAllText(outPath, result, Encoding.UTF8);
+                */
             }
         }
     }

@@ -34,7 +34,7 @@ namespace UniTyped.Generator
                     ProjectReflectionGenerator.GenerateViews(context, sourceBuilder);
                 }
                 else
-                {
+                {   
                     sourceBuilder.AppendLine("#if UNITY_EDITOR");
                     TypedViewGenerator.GenerateViews(context, sourceBuilder);
                     sourceBuilder.AppendLine("#endif");
