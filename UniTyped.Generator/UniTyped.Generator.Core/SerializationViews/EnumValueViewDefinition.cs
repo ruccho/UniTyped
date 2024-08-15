@@ -75,8 +75,8 @@ public class EnumValueViewDefinition : GeneratedViewDefinition
 
         public global::{{Utils.GetFullQualifiedTypeName(context, symbol, false)}} Value
         {
-            get => (global::{{Utils.GetFullQualifiedTypeName(context, symbol, false)}}) Property.enumValueIndex;
-            set => Property.enumValueIndex = (int) value;
+            get => (global::{{Utils.GetFullQualifiedTypeName(context, symbol, false)}}) Property.enumValueFlag;
+            set => Property.enumValueFlag = (int) value;
         }
 """);
 
