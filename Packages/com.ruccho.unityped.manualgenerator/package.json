@@ -1,6 +1,6 @@
 {
     "name": "com.ruccho.unityped.manualgenerator",
-    "version": "0.2.1",
+    "version": "0.2.2",
     "displayName": "UniTyped Manual Generator",
     "description": "Manual generator for UniTyped",
     "unity": "2021.3",
