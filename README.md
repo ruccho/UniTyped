@@ -7,35 +7,43 @@ UniTyped is a source generator that allows typed access to data such as Serializ
 - **Statically Typed**: Eliminates string-based unstable data accesses and allows accesses to non-existent data to be discovered at the compile stage. There is no need to write a large number of `FindProperty`s or deal with the complicated API of SerializedProperty.
 - **Less Heap Allocations**:  Generated code is struct-based and designed to avoid boxing.
 
-# Table of Contents
+## Table of Contents
 
- - [Requirements](#requirements)
- - [Installation](#installation)
- - [Limitations](#limitations)
- - [Features](#features)
+- [UniTyped](#unityped)
+  - [Table of Contents](#table-of-contents)
+  - [Requirements](#requirements)
+  - [Installation](#installation)
+  - [Limitations](#limitations)
+  - [Features](#features)
     - [Typed View Generation](#typed-view-generation)
-        - [Serialized Objects](#serialized-objects)
-        - [Materials](#materials)
-        - [Animator Parameters](#animator-parameters)
-    - [Tags and Layers Enums](#tags-and-layers-enums)
- - [Manual Generator](#manual-generator)
+      - [Serialized Objects](#serialized-objects)
+      - [Array / List operation](#array--list-operation)
+    - [Configure Code Generation](#configure-code-generation)
+  - [Materials](#materials)
+  - [Animator Parameters](#animator-parameters)
+  - [Tags and Layers Enums](#tags-and-layers-enums)
+  - [Manual Generator](#manual-generator)
+    - [Requirements](#requirements-1)
+    - [Installation](#installation-1)
+    - [Usage](#usage)
+  - [Hint](#hint)
 
-# Requirements
+## Requirements
  - Fully supported in Unity 2021.2 and later
  - In Unity 2021.1 and below, UniTyped features can be used with [Manual Generator](#manual-generator)
 
-# Installation
+## Installation
 Add git URL `https://github.com/ruccho/UniTyped.git?path=/Packages/com.ruccho.unityped` from UPM.
  
-# Limitations
+## Limitations
  - This project is currently experimental and breaking changes may be made.
  - It may not cover all use cases. Please let me know by issues if you notice anything.
 
-# Features
+## Features
 
-## Typed View Generation
+### Typed View Generation
 
-### Serialized Objects
+#### Serialized Objects
 Put `[UniTyped.UniTyped]` attribute on your MonoBehaviour, ScriptableObject or your custom serializable class / struct then you can use `UniTyped.Generated.[YourNamespace].[YourClass]View` struct in your editor code.
 
 ```csharp
@@ -106,9 +114,15 @@ public class ExampleEditor : UnityEditor.Editor
         for (int i = 0; i < view.someArray.Length; i++)
         {
             Debug.Log(view.someArray[i].Value);
+            
+            // set value
+            view.someArray[i].Set(100);
+            // ... or
+            var elementView = view.someArray[i];
+            elementView.Value = 100;
         }
 
-        //also accessible with IEnumerator<T>
+        // also accessible with IEnumerator<T>
         foreach (var element in view.someArray)
         {
             Debug.Log(element.Value);
@@ -123,7 +137,7 @@ public class ExampleEditor : UnityEditor.Editor
 #endif
 ```
 
-#### Configure Code Generation
+### Configure Code Generation
 Use `[UniTypedField]` attribute to control the result of code generation.
 
  - `ignore`: ignores the field.
@@ -171,7 +185,7 @@ public class ExampleEditor : UnityEditor.Editor
 #endif
 ```
 
-### Materials
+## Materials
 
 Create `partial` struct with `UniTyped.UniTypedMaterialView` attribute.
 
@@ -224,7 +238,7 @@ Shader "Unlit/NewUnlitShader"
 }
 ```
 
-### Animator Parameters
+## Animator Parameters
 
 Create `partial` struct with `UniTyped.UniTypedAnimatorView` attribute.
 Ensure that the latest aniamtor controller assets are saved to disk (with `Save Project`) .
@@ -320,20 +334,20 @@ public class TagsAndLayersExample : MonoBehaviour
 ```
 
 
-# Manual Generator
+## Manual Generator
 By default, UniType uses the functionality of the Roslyn source generator available in Unity 2021.2 and later. In Unity 2021.1 and below, you can use UniType with manual generator provided as individual package.
 
-## Requirements
+### Requirements
 
  - .NET runtime (supports `netcoreapp3.1` target)
     - ensure `dotnet` cli tool is available
  - MSBuild (included in Visual Studio or .NET SDK)
 
-## Installation
+### Installation
 
 Add git URL `https://github.com/ruccho/UniTyped.git?path=/Packages/com.ruccho.unityped.manualgenerator` from Package Manager.
 
-## Usage
+### Usage
 
 1. Create generator profile asset from `Create` > `UniTyped` > `Manual Generator Profile` in project view.
 2. Add generator item.
