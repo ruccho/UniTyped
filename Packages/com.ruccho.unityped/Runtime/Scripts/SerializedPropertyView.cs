@@ -25,6 +25,14 @@ namespace UniTyped.Editor
         T Value { get; set; }
     }
 
+    public static class SerializedPropertyViewExtension
+    {
+        public static void Set<T, TView>(this TView view, T value) where TView : ISerializedPropertyView<T>
+        {
+            view.Value = value;
+        }
+    }
+
     public struct SerializedPropertyViewArray<TElementView> : IEnumerable<TElementView>
         where TElementView : struct, ISerializedPropertyView
     {

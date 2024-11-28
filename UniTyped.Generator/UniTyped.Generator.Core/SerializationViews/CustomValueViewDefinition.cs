@@ -216,7 +216,7 @@ public class CustomValueViewDefinition : GeneratedViewDefinition
             }
         }
 
-        public {{fullQualifiedTypeName}} {{name}}
+        public readonly {{fullQualifiedTypeName}} {{name}}
         {
             get => {{viewPropertyName}}.Value;
             set
