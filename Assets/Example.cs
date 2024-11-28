@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UniTyped;
+#if UNITY_EDITOR
+using UniTyped.Editor;
+#endif
 
 [UniTyped]
 public class Example : MonoBehaviour
@@ -105,22 +108,26 @@ public class ExampleEditor : UnityEditor.Editor
         {
             Target = serializedObject
         };
-        
-        //UniTyped.Generated.Example.somee
+
+        view.someArray[0].Set(0);
 
         // array access
         for (int i = 0; i < view.someArray.Length; i++)
         {
             Debug.Log(view.someArray[i].Value);
+            
+            // set value
+            view.someArray[i].Set(100);
+            // ... or
+            var elementView = view.someArray[i];
+            elementView.Value = 100;
         }
 
-        //also accessible with IEnumerator<T>
+        // also accessible with IEnumerator<T>
         foreach (var element in view.someArray)
         {
             Debug.Log(element.Value);
         }
-        
-        //view.someManagedReferenceArray[0].
 
         serializedObject.ApplyModifiedProperties();
 
