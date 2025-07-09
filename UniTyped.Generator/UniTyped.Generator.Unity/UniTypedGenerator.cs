@@ -72,11 +72,15 @@ namespace UniTyped.Generator.Unity
 
             if (result != null)
             {
-                result = $"""
-                #if !UNITYPED_DISABLE_SOURCE_GENERATOR
-                {result}
-                #endif
-                """;
+                if (roslynContext.Compilation.AssemblyName != "UniTyped")
+                {
+                    result = $"""
+                              #if !UNITYPED_USER_DEFINE_DISABLE_SOURCE_GENERATOR
+                              {result}
+                              #endif
+                              """;
+                }
+                
 
                 roslynContext.AddSource($"{roslynContext.Compilation.AssemblyName}.g.cs",
                     SourceText.From(result.ToString(), Encoding.UTF8));
