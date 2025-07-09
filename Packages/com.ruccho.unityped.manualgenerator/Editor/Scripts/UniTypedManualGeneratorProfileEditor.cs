@@ -135,9 +135,7 @@ namespace UniTyped.Generator.Manual.Editor
 
     public class GeneratorRunner : IDisposable
     {
-        private static string generatorPath =
-            "Packages/com.ruccho.unityped.manualgenerator/Editor/Executable~/netcoreapp3.1/UniTyped.Generator.Standalone.dll";
-        //"Packages/com.ruccho.unityped.manualgenerator/Editor/Executable~/net6/UniTyped.Generator.Standalone.dll";
+        private static string generatorPath = "Packages/com.ruccho.unityped.manualgenerator/Editor/Executable~/netcoreapp3.1/UniTyped.Generator.Standalone.dll";
 
         private readonly Process process = default;
 
@@ -149,13 +147,13 @@ namespace UniTyped.Generator.Manual.Editor
             var fullGeneratorPath = Path.GetFullPath(generatorPath);
             var fullProjectPath = Path.GetFullPath(item.projectPath);
             var fullOutputFilePath = Path.GetFullPath(item.outputFile);
-            var args =
-                $"--roll-forward Major {fullGeneratorPath} --project {fullProjectPath} --output {fullOutputFilePath}";
+            var args = $"--roll-forward Major {fullGeneratorPath} --project {fullProjectPath} --output {fullOutputFilePath}";
+            
             process.StartInfo =
 #if UNITY_EDITOR_WIN
                 new ProcessStartInfo("dotnet", args)
 #else
-                new ProcessStartInfo("/bin/bash/", $"-cl dotnet --version")
+                new ProcessStartInfo("/bin/bash", $"-cl \"dotnet {args}\"")
 #endif
                 {
                     RedirectStandardOutput = true,
