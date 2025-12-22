@@ -846,7 +846,10 @@
           "YamlDotNet": "13.1.0"
         },
         "runtime": {
-          "UniTyped.Generator.Core.dll": {}
+          "UniTyped.Generator.Core.dll": {
+            "assemblyVersion": "1.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       }
     }
