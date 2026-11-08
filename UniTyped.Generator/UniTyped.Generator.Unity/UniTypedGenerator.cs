@@ -68,7 +68,8 @@ namespace UniTyped.Generator.Unity
             if (roslynContext.SyntaxContextReceiver is not SyntaxContextReceiver receiver)
                 throw new InvalidOperationException();
             
-            string? result = Generator.UniTypedGenerator.Execute(roslynContext.Compilation, receiver);
+            string? result = Generator.UniTypedGenerator.Execute(roslynContext.Compilation, receiver,
+                GetProjectPath(roslynContext));
 
             if (result != null)
             {
@@ -87,6 +88,27 @@ namespace UniTyped.Generator.Unity
                 File.WriteAllText(outPath, result, Encoding.UTF8);
                 */
             }
+        }
+
+        // Unity passes "<assembly>.UnityAdditionalFile.txt" to the compiler, and its first line is the
+        // project root. This also works when the package is referenced by a "file:" path outside the
+        // project, where the location of ProjectAnchor.cs does not tell the project root.
+        private static string? GetProjectPath(GeneratorExecutionContext context)
+        {
+            foreach (var file in context.AdditionalFiles)
+            {
+                if (!Path.GetFileName(file.Path).EndsWith(".UnityAdditionalFile.txt", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                var text = file.GetText(context.CancellationToken);
+                if (text == null || text.Lines.Count == 0) continue;
+
+                var projectPath = text.Lines[0].ToString().Trim();
+                if (projectPath.Length > 0 && Directory.Exists(Path.Combine(projectPath, "ProjectSettings")))
+                    return projectPath;
+            }
+
+            return null;
         }
     }
 }
