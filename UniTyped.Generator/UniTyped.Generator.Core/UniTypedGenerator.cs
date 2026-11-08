@@ -9,7 +9,7 @@ namespace UniTyped.Generator
 {
     public static partial class UniTypedGenerator
     {
-        public static string? Execute(Compilation compilation, IUniTypedCollector collector)
+        public static string? Execute(Compilation compilation, IUniTypedCollector collector, string? projectPath = null)
         {
             var assembly = compilation.AssemblyName;
             if (assembly == null) return null;
@@ -27,7 +27,7 @@ namespace UniTyped.Generator
             UniTypedGeneratorContext? context = null;
             try
             {
-                context = new UniTypedGeneratorContext(compilation, collector);
+                context = new UniTypedGeneratorContext(compilation, collector, projectPath);
 
                 if (isUniTypedAssembly)
                 {

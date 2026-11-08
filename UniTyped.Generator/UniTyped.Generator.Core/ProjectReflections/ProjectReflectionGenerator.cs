@@ -18,7 +18,7 @@ namespace UniTyped.Reflection
 
         try
         {
-            var projectPath = GetProjectPathFromAnchor(context);
+            var projectPath = context.ProjectPath ?? GetProjectPathFromAnchor(context);
             var projectSettingsPath = Path.Combine(projectPath, "ProjectSettings");
 
             // tags and layers

@@ -7,6 +7,12 @@ public class UniTypedGeneratorContext
 {
     public IUniTypedCollector Collector { get; }
     public Compilation Compilation { get; }
+
+    /// <summary>
+    /// Root directory of the Unity project, if the caller knows it.
+    /// When null, it is inferred from the location of ProjectAnchor.cs.
+    /// </summary>
+    public string? ProjectPath { get; }
     public INamedTypeSymbol List { get; }
     public INamedTypeSymbol SerializeField { get; }
     public INamedTypeSymbol SerializeReference { get; }
@@ -112,8 +118,9 @@ public class UniTypedGeneratorContext
         }
     }
 
-    public UniTypedGeneratorContext(Compilation compilation, IUniTypedCollector collector)
+    public UniTypedGeneratorContext(Compilation compilation, IUniTypedCollector collector, string? projectPath = null)
     {
+        ProjectPath = projectPath;
 
         Collector = collector;
 
